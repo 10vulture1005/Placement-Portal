@@ -24,13 +24,18 @@ export async function submitFeedback(formData: FormData): Promise<FeedbackSubmit
   const student = await requireStudent();
   if (!student.user) return { error: "Persistent feedback requires Google sign-in." };
 
-  const feedback = await db.feedback.create({
-    data: {
-      userId: student.user.id,
-      feedbackType: parsed.data.feedbackType,
-      content: JSON.stringify({ subject: parsed.data.subject, message: parsed.data.message }),
-    },
-  });
-  revalidatePath("/feedback");
-  return { reference: `FB-${feedback.id.slice(-8).toUpperCase()}` };
+  try {
+    const { backendFetch } = await import("@/lib/api-client");
+    const feedback: any = await backendFetch("/api/v1/feedback", {
+      method: "POST",
+      body: JSON.stringify({
+        feedbackType: parsed.data.feedbackType,
+        content: JSON.stringify({ subject: parsed.data.subject, message: parsed.data.message }),
+      }),
+    });
+    revalidatePath("/feedback");
+    return { reference: `FB-${feedback.id.slice(-8).toUpperCase()}` };
+  } catch (error) {
+    return { error: "Failed to submit feedback." };
+  }
 }

@@ -1,6 +1,6 @@
 import { AuthenticatedPortalShell } from "@/components/layout/authenticated-portal-shell";
 import { ProfileView, type StudentProfileViewData } from "@/components/profile/profile-view";
-import { db } from "@/lib/db";
+import { backendFetch } from "@/lib/api-client";
 import { calculateProfileCompletion } from "@/lib/student-profile";
 import { requireStudent, studentDisplayName, studentInitials } from "@/lib/student-session";
 
@@ -8,14 +8,19 @@ export const dynamic = "force-dynamic";
 
 export default async function Page() {
   const student = await requireStudent();
-  const resumes = student.user
-    ? await db.resume.findMany({
-        where: { userId: student.user.id },
-        orderBy: { uploadedAt: "desc" },
-      })
-    : [];
+  let user: any = null;
+  let resumes: any[] = [];
+  
+  if (student.user) {
+    try {
+      user = await backendFetch("/api/v1/profile");
+      resumes = await backendFetch("/api/v1/profile/resumes");
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
   const name = studentDisplayName(student);
-  const user = student.user;
   const profile: StudentProfileViewData = {
     canPersist: Boolean(user),
     initials: studentInitials(name),
@@ -32,12 +37,12 @@ export default async function Page() {
       batch: user?.batch?.toString() ?? "",
       gender: user?.gender ?? "",
       bloodGroup: user?.bloodGroup ?? "",
-      dateOfBirth: user?.dateOfBirth?.toISOString().slice(0, 10) ?? "",
+      dateOfBirth: user?.dateOfBirth ? user.dateOfBirth.slice(0, 10) : "",
       currentAddress: user?.currentAddress ?? "",
       class10Percent: user?.class10Percent?.toString() ?? "",
       class12Percent: user?.class12Percent?.toString() ?? "",
       cgpa: user?.cgpa?.toString() ?? "",
-      backlogs: user?.backlogs.toString() ?? "0",
+      backlogs: user?.backlogs?.toString() ?? "0",
     },
     identityDocuments: {
       aadhaarProvided: Boolean(user?.aadhaarEncrypted),
@@ -47,7 +52,7 @@ export default async function Page() {
       id: resume.id,
       label: resume.label,
       name: resume.fileName,
-      uploadedAt: resume.uploadedAt.toISOString(),
+      uploadedAt: resume.uploadedAt,
     })),
   };
 

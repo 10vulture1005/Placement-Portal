@@ -7,6 +7,8 @@ import type { Role } from "@prisma/client";
 import { canUseGoogleAccount, isAdminEmail } from "@/lib/auth-access";
 import { db } from "@/lib/db";
 
+import { SignJWT } from "jose";
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   secret: process.env.AUTH_SECRET ?? (process.env.NODE_ENV === "production" ? undefined : "tnp-local-development-secret-change-before-production"),
   adapter: PrismaAdapter(db),
@@ -48,9 +50,26 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       return token;
     },
-    session({ session, token }) {
+    async session({ session, token }) {
       session.user.id = token.id as string;
       session.user.role = token.role as Role;
+      
+      // Generate a JWT for FastAPI backend authentication
+      const secret = new TextEncoder().encode(
+        process.env.AUTH_SECRET ?? "tnp-local-development-secret-change-before-production"
+      );
+      const accessToken = await new SignJWT({
+        sub: session.user.id,
+        email: session.user.email,
+        role: session.user.role,
+      })
+        .setProtectedHeader({ alg: "HS256" })
+        .setIssuedAt()
+        .setExpirationTime("1d")
+        .sign(secret);
+        
+      (session as any).accessToken = accessToken;
+      
       return session;
     }
   },

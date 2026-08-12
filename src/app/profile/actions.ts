@@ -45,15 +45,16 @@ export async function updateStudentProfile(
   }
 
   try {
-    await db.user.update({
-      where: { id: student.user.id },
-      data: parsed.data,
+    const { backendFetch } = await import("@/lib/api-client");
+    await backendFetch("/api/v1/profile", {
+      method: "PATCH",
+      body: JSON.stringify(parsed.data),
     });
-  } catch (error) {
-    if (typeof error === "object" && error && "code" in error && error.code === "P2002") {
+  } catch (error: any) {
+    if (error.message?.includes("P2002") || error.message?.includes("already in use")) {
       return { error: "That roll number or personal email is already in use." };
     }
-    throw error;
+    return { error: "Failed to update profile." };
   }
 
   revalidatePath("/profile");

@@ -1,3 +1,22 @@
 import { FormsView } from "@/components/forms/forms-view";
 import { AuthenticatedPortalShell } from "@/components/layout/authenticated-portal-shell";
-export default function Page(){return <AuthenticatedPortalShell><FormsView/></AuthenticatedPortalShell>}
+import { backendFetch } from "@/lib/api-client";
+import { requireStudent } from "@/lib/student-session";
+
+export const dynamic = "force-dynamic";
+
+export default async function Page() {
+  await requireStudent();
+  let nocs = [];
+  try {
+    nocs = await backendFetch("/api/v1/noc");
+  } catch (error) {
+    console.error("Failed to fetch NOCs", error);
+  }
+
+  return (
+    <AuthenticatedPortalShell>
+      <FormsView initialNocs={nocs as any} />
+    </AuthenticatedPortalShell>
+  );
+}
