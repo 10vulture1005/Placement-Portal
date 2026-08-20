@@ -18,8 +18,7 @@ def _decode_token(token: str) -> dict:
     Raises HTTP 401 if the token is invalid or expired.
     """
     try:
-        payload = jwt.decode(token, settings.auth_secret, algorithms=_ALGORITHMS)
-        return payload
+        return jwt.decode(token, settings.auth_secret, algorithms=_ALGORITHMS)
     except ExpiredSignatureError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -33,24 +32,46 @@ def _decode_token(token: str) -> dict:
         )
 
 
+def _email_of(payload: dict) -> str:
+    return (payload.get("email") or "").strip().lower()
+
+
+def is_admin_email(email: str) -> bool:
+    """ADMIN_EMAILS is the only source of administrator access."""
+    return bool(email) and email in settings.admin_email_set
+
+
+def is_student_email(email: str) -> bool:
+    _, _, domain = email.partition("@")
+    return bool(domain) and domain == settings.normalized_student_domain
+
+
 def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
 ) -> dict:
     """
     Dependency: decode the bearer JWT and return the full payload.
-    Use this when you need the raw token claims.
+    Rejects any account that is neither an institute student nor a
+    configured administrator, so revoking access in .env takes effect here
+    even while a previously issued token is still within its lifetime.
     """
-    return _decode_token(credentials.credentials)
+    payload = _decode_token(credentials.credentials)
+    email = _email_of(payload)
+    if not (is_student_email(email) or is_admin_email(email)):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="This account is not permitted to use the placement portal.",
+        )
+    return payload
 
 
 def require_student(
-    credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
+    payload: dict = Depends(get_current_user),
 ) -> dict:
     """
-    Dependency: verifies the token and asserts the caller has role=STUDENT.
-    Returns the token payload dict with at minimum: sub (user id), role, email.
+    Dependency: asserts the caller is a student.
+    Returns the token payload with at minimum: sub (user id), role, email.
     """
-    payload = _decode_token(credentials.credentials)
     if payload.get("role") != "STUDENT":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -60,14 +81,16 @@ def require_student(
 
 
 def require_admin(
-    credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
+    payload: dict = Depends(get_current_user),
 ) -> dict:
     """
-    Dependency: verifies the token and asserts the caller has role=ADMIN.
-    Returns the token payload dict.
+    Dependency: asserts the caller is an administrator.
+
+    The signed role claim is not trusted on its own: the address must also be
+    listed in ADMIN_EMAILS right now, so removing it from .env revokes admin
+    access immediately rather than when the token expires.
     """
-    payload = _decode_token(credentials.credentials)
-    if payload.get("role") != "ADMIN":
+    if payload.get("role") != "ADMIN" or not is_admin_email(_email_of(payload)):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Administrator access is required for this resource.",

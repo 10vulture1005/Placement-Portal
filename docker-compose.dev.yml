@@ -1,0 +1,33 @@
+# Development override. Bind-mounts source and runs both apps with hot reload.
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    environment:
+      ENVIRONMENT: development
+    volumes:
+      - ./backend:/app
+    # Dockerfile.dev already enables uvicorn --reload.
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile.dev
+    environment:
+      NODE_ENV: development
+    volumes:
+      - .:/app
+      # Named volumes shadow the bind mount so container-installed
+      # dependencies and build output never touch the host tree.
+      - frontend_node_modules:/app/node_modules
+      - frontend_next:/app/frontend/.next
+    depends_on:
+      backend:
+        condition: service_started
+
+volumes:
+  frontend_node_modules:
+  frontend_next:

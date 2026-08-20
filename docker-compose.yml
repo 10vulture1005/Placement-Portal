@@ -1,31 +1,92 @@
+name: tnp-portal
+
+# Production-style stack. For hot-reload development use:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+#
+# The in-cluster DATABASE_URL is built here from POSTGRES_* rather than read
+# from .env, because the .env value points at localhost for host-side tooling.
+
+x-database-url: &database-url
+  postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-tnp_portal}
+
 services:
   db:
     image: postgres:16-alpine
-    environment: { POSTGRES_DB: tnp_portal, POSTGRES_USER: postgres, POSTGRES_PASSWORD: postgres }
-    ports: ["5432:5432"]
-    volumes: ["postgres_data:/var/lib/postgresql/data"]
-    healthcheck: { test: ["CMD-SHELL","pg_isready -U postgres -d tnp_portal"], interval: 5s, timeout: 5s, retries: 10 }
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-tnp_portal}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-tnp_portal}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  # One-shot: applies Prisma migrations and seeds administrators, then exits.
+  migrate:
+    build:
+      # Repository root: the npm workspace lockfile lives there.
+      context: .
+      dockerfile: database/Dockerfile
+    restart: "no"
+    environment:
+      DATABASE_URL: *database-url
+      ADMIN_EMAILS: ${ADMIN_EMAILS:-}
+    depends_on:
+      db:
+        condition: service_healthy
+
   backend:
-    build: ./backend
-    ports: ["8000:8000"]
+    build:
+      context: ./backend
+    restart: unless-stopped
     environment:
-      DATABASE_URL: postgresql+asyncpg://postgres:postgres@db:5432/tnp_portal
-      AUTH_SECRET: ${AUTH_SECRET:-local-docker-secret-change-me}
-      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-0000000000000000000000000000000000000000000000000000000000000000}
-      CORS_ORIGINS: '["http://localhost:3000"]'
-    depends_on: { db: { condition: service_healthy } }
-    healthcheck: { test: ["CMD-SHELL","python -c \"import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/api/health').status==200 else 1)\""], interval: 10s, timeout: 5s, retries: 10 }
-  app:
-    build: .
-    ports: ["3000:3000"]
+      DATABASE_URL: *database-url
+      AUTH_SECRET: ${AUTH_SECRET:?AUTH_SECRET must be set in .env}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:?ENCRYPTION_KEY must be set in .env}
+      ADMIN_EMAILS: ${ADMIN_EMAILS:-}
+      STUDENT_EMAIL_DOMAIN: ${STUDENT_EMAIL_DOMAIN:-iiitl.ac.in}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+      ENVIRONMENT: ${ENVIRONMENT:-production}
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME:-}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY:-}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET:-}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+
+  frontend:
+    build:
+      # Repository root, so the build can read database/prisma/schema.prisma.
+      context: .
+      dockerfile: frontend/Dockerfile
+    restart: unless-stopped
     environment:
-      DATABASE_URL: postgresql://postgres:postgres@db:5432/tnp_portal
-      AUTH_SECRET: ${AUTH_SECRET:-local-docker-secret-change-me}
-      AUTH_GOOGLE_ID: ${AUTH_GOOGLE_ID:-}
-      AUTH_GOOGLE_SECRET: ${AUTH_GOOGLE_SECRET:-}
+      DATABASE_URL: *database-url
       BACKEND_URL: http://backend:8000
-    depends_on: 
-      db: { condition: service_healthy }
-      backend: { condition: service_started }
-    healthcheck: { test: ["CMD-SHELL","wget -qO- http://localhost:3000/api/health || exit 1"], interval: 10s, timeout: 5s, retries: 10 }
-volumes: { postgres_data: {} }
+      AUTH_SECRET: ${AUTH_SECRET:?AUTH_SECRET must be set in .env}
+      AUTH_URL: ${AUTH_URL:-http://localhost:3000}
+      AUTH_TRUST_HOST: "true"
+      AUTH_GOOGLE_ID: ${AUTH_GOOGLE_ID:?AUTH_GOOGLE_ID must be set in .env}
+      AUTH_GOOGLE_SECRET: ${AUTH_GOOGLE_SECRET:?AUTH_GOOGLE_SECRET must be set in .env}
+      ADMIN_EMAILS: ${ADMIN_EMAILS:-}
+      STUDENT_EMAIL_DOMAIN: ${STUDENT_EMAIL_DOMAIN:-iiitl.ac.in}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:?ENCRYPTION_KEY must be set in .env}
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  postgres_data:

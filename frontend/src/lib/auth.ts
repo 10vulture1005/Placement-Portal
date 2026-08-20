@@ -1,0 +1,76 @@
+import { PrismaAdapter } from "@auth/prisma-adapter";
+import NextAuth from "next-auth";
+import Google from "next-auth/providers/google";
+import { SignJWT } from "jose";
+import { canUseGoogleAccount, resolveRole } from "@/lib/auth-access";
+import { db } from "@/lib/db";
+
+const DEVELOPMENT_SECRET = "tnp-local-development-secret-change-before-production";
+
+// Resolved lazily rather than at module load: `next build` evaluates this
+// module with NODE_ENV=production and no secret available, so throwing here
+// would break the production image build.
+function authSecret() {
+  return (
+    process.env.AUTH_SECRET ??
+    (process.env.NODE_ENV === "production" ? undefined : DEVELOPMENT_SECRET)
+  );
+}
+
+function requireAuthSecret() {
+  const secret = authSecret();
+  if (!secret) throw new Error("AUTH_SECRET must be set in production.");
+  return secret;
+}
+
+export const { handlers, auth, signIn, signOut } = NextAuth({
+  secret: authSecret(),
+  adapter: PrismaAdapter(db),
+  session: { strategy: "jwt" },
+  pages: { signIn: "/login", error: "/login" },
+  providers: [Google({ authorization: { params: { prompt: "select_account" } } })],
+  callbacks: {
+    async signIn({ profile, user }) {
+      const email = (profile?.email ?? user.email)?.toLowerCase();
+      if (!canUseGoogleAccount(email)) return false;
+
+      // Reconcile the stored role on every sign-in so that editing
+      // ADMIN_EMAILS both grants and revokes access. New users are handled by
+      // the createUser event, which runs after the adapter inserts the row.
+      await db.user.updateMany({ where: { email }, data: { role: resolveRole(email) } });
+      return true;
+    },
+    jwt({ token, user }) {
+      if (user?.id) {
+        token.id = user.id;
+        token.email = user.email ?? token.email;
+      }
+      // Recomputed on every request so removing an address from ADMIN_EMAILS
+      // takes effect immediately instead of lingering until the session expires.
+      token.role = resolveRole(token.email);
+      return token;
+    },
+    async session({ session, token }) {
+      session.user.id = token.id;
+      session.user.role = token.role;
+      session.accessToken = await new SignJWT({
+        sub: token.id,
+        email: token.email,
+        role: token.role,
+      })
+        .setProtectedHeader({ alg: "HS256" })
+        .setIssuedAt()
+        .setExpirationTime("1d")
+        .sign(new TextEncoder().encode(requireAuthSecret()));
+      return session;
+    },
+  },
+  events: {
+    async createUser({ user }) {
+      const role = resolveRole(user.email);
+      if (role !== "STUDENT") {
+        await db.user.update({ where: { id: user.id }, data: { role } });
+      }
+    },
+  },
+});

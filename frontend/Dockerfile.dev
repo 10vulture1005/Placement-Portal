@@ -1,0 +1,11 @@
+# Development image: the workspace is bind-mounted, so dependencies are
+# installed on start and Next.js runs with hot reload.
+FROM node:20-alpine
+RUN apk add --no-cache openssl wget
+WORKDIR /app
+ENV NEXT_TELEMETRY_DISABLED=1 \
+    PORT=3000 \
+    HOSTNAME=0.0.0.0 \
+    WATCHPACK_POLLING=true
+EXPOSE 3000
+CMD ["sh", "-c", "npm install --no-audit --fund=false && npm run db:generate && npm run dev"]

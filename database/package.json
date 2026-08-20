@@ -1,0 +1,27 @@
+{
+  "name": "@tnp/database",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Prisma schema, migrations, and seed data for the IIIT Lucknow T&P Portal. This package is the single owner of the database schema; the FastAPI backend mirrors it with SQLAlchemy models but never migrates it.",
+  "scripts": {
+    "generate": "prisma generate",
+    "migrate": "prisma migrate dev",
+    "deploy": "prisma migrate deploy",
+    "seed": "tsx prisma/seed.ts",
+    "sync-admins": "tsx scripts/sync-admin-roles.ts",
+    "remove-demo": "tsx scripts/remove-demo-data.ts",
+    "studio": "prisma studio"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.19.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.0",
+    "prisma": "^6.19.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.0"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  }
+}

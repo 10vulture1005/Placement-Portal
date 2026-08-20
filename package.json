@@ -2,43 +2,26 @@
   "name": "tnp-portal",
   "version": "0.1.0",
   "private": true,
+  "description": "IIIT Lucknow Training & Placement Portal. Node workspaces cover the Next.js frontend and the Prisma-owned database package; the API lives in the Python backend/ service.",
+  "workspaces": [
+    "frontend",
+    "database"
+  ],
+  "overridesRationale": "next-auth and @auth/prisma-adapter resolve different @auth/core patch versions, which makes their Adapter and JWT types structurally incompatible. Pin the version next-auth expects.",
+  "overrides": {
+    "@auth/core": "0.41.2"
+  },
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint .",
-    "type-check": "tsc --noEmit",
-    "test": "node --import tsx --test src/lib/auth-access.test.ts src/lib/company-schema.test.ts src/lib/job-profile-schema.test.ts src/lib/eligibility.test.ts src/lib/encryption.test.ts src/lib/student-profile.test.ts",
-    "db:generate": "prisma generate",
-    "db:migrate": "prisma migrate dev",
-    "db:seed": "tsx prisma/seed.ts",
-    "db:sync-admins": "tsx scripts/sync-admin-roles.ts",
-    "db:remove-demo": "tsx scripts/remove-demo-data.ts"
-  },
-  "dependencies": {
-    "@auth/prisma-adapter": "^2.11.2",
-    "@prisma/client": "^6.19.0",
-    "@tailwindcss/postcss": "^4.3.2",
-    "jose": "^6.2.8",
-    "lucide-react": "^1.24.0",
-    "next": "^16.2.10",
-    "next-auth": "5.0.0-beta.31",
-    "react": "^19.2.7",
-    "react-dom": "^19.2.7",
-    "tailwindcss": "^4.3.2",
-    "zod": "^4.4.3"
-  },
-  "devDependencies": {
-    "@types/node": "^20.17.0",
-    "@types/react": "^19.2.0",
-    "@types/react-dom": "^19.2.0",
-    "eslint": "^9.39.0",
-    "eslint-config-next": "^16.2.10",
-    "prisma": "^6.19.0",
-    "tsx": "^4.20.0",
-    "typescript": "^5.9.0"
-  },
-  "prisma": {
-    "seed": "tsx prisma/seed.ts"
+    "dev": "npm run dev --workspace @tnp/frontend",
+    "build": "npm run build --workspace @tnp/frontend",
+    "lint": "npm run lint --workspace @tnp/frontend",
+    "type-check": "npm run type-check --workspace @tnp/frontend",
+    "test": "npm run test --workspace @tnp/frontend",
+    "db:generate": "npm run generate --workspace @tnp/database",
+    "db:migrate": "npm run migrate --workspace @tnp/database",
+    "db:deploy": "npm run deploy --workspace @tnp/database",
+    "db:seed": "npm run seed --workspace @tnp/database",
+    "db:sync-admins": "npm run sync-admins --workspace @tnp/database",
+    "db:studio": "npm run studio --workspace @tnp/database"
   }
 }

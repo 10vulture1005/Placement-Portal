@@ -1,6 +1,19 @@
-node_modules
-.next
 .git
-.env*
+.github
+.cursor
+**/node_modules
+**/.next
+**/out
+**/__pycache__
+**/*.py[cod]
+**/.venv
+**/coverage
+**/*.tsbuildinfo
+.env
+.env.*
+!.env.example
 reference images
+docs
+docker/data
+*.log
 npm-debug.log*

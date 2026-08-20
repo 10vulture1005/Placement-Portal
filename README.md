@@ -66,94 +66,111 @@ flowchart LR
 
 | Layer | Stack |
 |---|---|
-| Application | Next.js 16 App Router, React 19, TypeScript 5 |
+| Frontend (`frontend/`) | Next.js 16 App Router, React 19, TypeScript 5 |
+| Backend API (`backend/`) | FastAPI, SQLAlchemy 2, Pydantic 2, Python 3.12 |
+| Database (`database/`) | PostgreSQL 16, Prisma 6 schema and migrations |
 | Styling | Tailwind CSS 4, responsive repository-owned design system |
-| Authentication | Auth.js, Google OAuth, JWT sessions, role-based access |
-| Database | PostgreSQL 16, Prisma 6 |
-| Validation and security | Zod, AES-256-GCM, security headers |
-| Testing | Node test runner with `tsx` |
+| Authentication | Auth.js, Google OAuth, JWT sessions shared with the backend |
+| Validation and security | Zod, Pydantic, AES-256-GCM, security headers |
+| Testing | Node test runner with `tsx`, pytest |
 | Infrastructure | Docker, Docker Compose, GitHub Actions |
+
+Each service has its own container. `frontend` and `database` are npm workspaces
+sharing one lockfile at the repository root; `backend` is an independent Python
+service. The Prisma schema in `database/` is the single owner of the database
+structure, and the backend's SQLAlchemy models mirror it without migrating it.
 
 ## Quick start
 
 ### Requirements
 
-- Node.js 20 or newer
-- npm
 - Docker Desktop with the Linux engine running
+- Node.js 20 or newer and npm (only for running the frontend outside Docker)
+- Python 3.12 (only for running the backend outside Docker)
 
-### 1. Install dependencies
+### 1. Configure the environment
 
-```bash
-git clone https://github.com/mrkeshav-05/Placement-Portal.git
-cd Placement-Portal
-npm install
-```
-
-### 2. Configure the environment
-
-Copy `.env.example` to `.env` and generate private values for `AUTH_SECRET` and `ENCRYPTION_KEY`.
+Copy `.env.example` to `.env` and generate private values. One `.env` at the
+repository root serves every service.
 
 ```powershell
 Copy-Item .env.example .env
-node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"
-node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"  # AUTH_SECRET
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"        # ENCRYPTION_KEY
 ```
 
-The local database URL is:
+Set `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, and at least one address in
+`ADMIN_EMAILS`. Compose refuses to start if `AUTH_SECRET`, `ENCRYPTION_KEY`, or
+the Google credentials are missing. Never commit `.env` or real student data.
+
+### 2. Run everything with Docker
+
+```bash
+docker compose up --build
+```
+
+That starts four containers: `db` (PostgreSQL 16), `migrate` (applies Prisma
+migrations and seeds administrators, then exits), `backend` (FastAPI on
+port 8000), and `frontend` (Next.js on port 3000).
+
+Open [http://localhost:3000](http://localhost:3000). The API docs are at
+[http://localhost:8000/docs](http://localhost:8000/docs).
+
+For hot reload while developing, add the dev override:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+```
+
+### 3. Or run the services directly
+
+```bash
+docker compose up -d db      # database only
+npm install                  # installs both npm workspaces
+npm run db:migrate
+npm run db:seed
+npm run dev                  # frontend on :3000
+
+# in a second terminal
+cd backend
+pip install -r requirements.txt
+uvicorn main:app --reload    # backend on :8000
+```
+
+## Authentication and access control
+
+Sign-in is Google-only; there are no password accounts. A user record is created
+automatically on first successful sign-in.
+
+- **Students** must use a Google account on the domain in `STUDENT_EMAIL_DOMAIN`
+  (`iiitl.ac.in` by default). Any other account is refused with an explanation
+  on the sign-in page.
+- **Administrators** are defined solely by `ADMIN_EMAILS`. There is no built-in
+  administrator account, and an address listed there may sign in from outside
+  the institute domain.
 
 ```env
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/tnp_portal"
+STUDENT_EMAIL_DOMAIN="iiitl.ac.in"
+ADMIN_EMAILS="first.admin@example.com,second.admin@example.com"
 ```
 
-Never commit `.env` or real student data.
+The role is recomputed from `ADMIN_EMAILS` on every request rather than being
+frozen into the session, so adding or removing an address takes effect as soon
+as the services pick up the new value — no waiting for a session to expire. The
+FastAPI service re-checks the allowlist too, so a token minted while an address
+was still listed stops granting admin access once it is removed.
 
-### 3. Start and initialize PostgreSQL
+Run `npm run db:sync-admins` to reconcile roles already stored in the database:
+it promotes every listed address and demotes any stored administrator that is no
+longer listed.
 
-```bash
-docker compose up -d db
-npx prisma migrate dev
-npm run db:seed
-```
-
-### 4. Start the portal
-
-```bash
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000).
-
-## Development accounts
-
-The following accounts work only outside production and do not require Google OAuth or PostgreSQL sessions:
-
-| Role | Email | Password |
-|---|---|---|
-| Student | `student@iiitl.ac.in` | `student123` |
-| Administrator | `admin@iiitl.ac.in` | `admin123` |
-
-Development credential login is automatically rejected when `NODE_ENV=production`.
-
-## Google OAuth
-
-Create a Google OAuth web client and register this local callback:
+Create a Google OAuth web client and register this callback:
 
 ```text
 http://localhost:3000/api/auth/callback/google
 ```
 
-Then set `AUTH_GOOGLE_ID` and `AUTH_GOOGLE_SECRET` in `.env`. Add the equivalent HTTPS callback before production deployment.
-
-Student access is restricted on the server to `@iiitl.ac.in`. Additional Google accounts can be granted administrator access with a comma-separated allowlist:
-
-```env
-ADMIN_EMAILS="first.admin@example.com,second.admin@example.com"
-```
-
-Only place trusted administrator accounts in this list. An account must sign in again after the list changes so its JWT receives the updated role.
-
-Run `npm run db:sync-admins` after changing the list to synchronize roles for administrator accounts that already exist in the database.
+Add the equivalent HTTPS callback before production deployment.
 
 ## Adding a company
 
@@ -178,39 +195,58 @@ Student profiles appear under `/admin/students` after their first institute Goog
 
 ## Commands
 
+Run these from the repository root; they delegate to the right workspace.
+
 | Command | Purpose |
 |---|---|
-| `npm run dev` | Start the development server |
-| `npm run build` | Create a production build |
+| `npm run dev` | Start the frontend development server |
+| `npm run build` | Create a production frontend build |
 | `npm run lint` | Run ESLint |
 | `npm run type-check` | Run strict TypeScript checks |
-| `npm test` | Run authentication, validation, eligibility, profile, and encryption tests |
+| `npm test` | Run auth, validation, eligibility, profile, and encryption tests |
 | `npm run db:generate` | Generate Prisma Client |
 | `npm run db:migrate` | Create/apply a development migration |
-| `npm run db:seed` | Seed the initial placement administrator account only |
+| `npm run db:deploy` | Apply existing migrations (used by the `migrate` container) |
+| `npm run db:seed` | Create the administrator accounts listed in `ADMIN_EMAILS` |
+| `npm run db:sync-admins` | Promote listed admins and demote unlisted ones |
+| `npm run db:studio` | Open Prisma Studio |
+
+Backend commands run from `backend/`:
+
+| Command | Purpose |
+|---|---|
+| `uvicorn main:app --reload` | Start the API with hot reload |
+| `pytest` | Run backend tests |
 
 Run the full verification suite before opening a pull request:
 
 ```bash
-npm run lint
-npm run type-check
-npm test
-npm run build
+npm run lint && npm run type-check && npm test && npm run build
+cd backend && pytest
 ```
 
 ## Repository structure
 
 ```text
-src/app/                    App Router pages and API routes
-src/components/layout/      Student portal shell
-src/components/admin/       Admin shell, analytics, and management UI
-src/components/dashboard/   Announcements and student metrics
-src/components/jobs/        Opportunity browsing and apply interaction
-src/components/profile/     Student profile and resume management
-src/components/applications Application tracking
-src/lib/                    Auth, database, encryption, and eligibility logic
-prisma/                     Schema, migrations, and seed data
-docs/                       Architecture, feature status, decisions, and handoffs
+frontend/                   Next.js application (npm workspace)
+  src/app/                  App Router pages and route handlers
+  src/components/           Student and admin UI, grouped by feature
+  src/lib/                  Auth, backend client, encryption, eligibility
+  Dockerfile                Production image
+  Dockerfile.dev            Hot-reload image
+backend/                    FastAPI service
+  app/core/                 Config, database session, security, storage
+  app/routers/              HTTP endpoints
+  app/schemas/              Pydantic request/response models
+  app/services/             Business rules such as eligibility
+  tests/                    pytest suite
+database/                   Prisma schema, migrations, seed (npm workspace)
+  prisma/                   schema.prisma, migrations, seed.ts
+  scripts/                  Administrative maintenance scripts
+  Dockerfile                One-shot migration/seed runner
+docker-compose.yml          Production-style stack
+docker-compose.dev.yml      Hot-reload override
+docs/                       Architecture, feature status, decisions, handoffs
 ```
 
 ## Current status

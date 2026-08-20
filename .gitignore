@@ -1,9 +1,28 @@
+# Node / Next.js
 node_modules/
 .next/
 out/
+*.tsbuildinfo
+npm-debug.log*
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Environment
 .env
 .env.local
+.env.*.local
+
+# Tooling
+coverage/
 *.log
 .DS_Store
-coverage/
-*.tsbuildinfo
+
+# Local service data
+docker/data/
