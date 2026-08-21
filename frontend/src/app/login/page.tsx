@@ -1,4 +1,5 @@
-import { AlertCircle, GraduationCap, ShieldCheck } from "lucide-react";
+import { AlertCircle, ShieldCheck } from "lucide-react";
+import Image from "next/image";
 import { redirect } from "next/navigation";
 import { auth, signIn } from "@/lib/auth";
 import { studentEmailDomain } from "@/lib/auth-access";
@@ -43,7 +44,7 @@ export default async function LoginPage({
   return (
     <main className="login-page">
       <section className="login-story">
-        <div className="login-brand"><GraduationCap /><span>IIIT Lucknow</span></div>
+        <div className="login-brand"><Image src="/iiitl-emblem.png" alt="" width={44} height={35} priority /><span>IIIT Lucknow</span></div>
         <div>
           <span className="eyebrow">Training &amp; Placement Cell</span>
           <h1>Your career journey,<br />all in one place.</h1>

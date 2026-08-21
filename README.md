@@ -137,6 +137,38 @@ pip install -r requirements.txt
 uvicorn main:app --reload    # backend on :8000
 ```
 
+## Demonstration data
+
+A sample dataset ships as `database/seed-data.zip` so the portal can be reviewed
+with realistic content instead of empty tables. Load it with one command:
+
+```bash
+npm run db:seed:demo
+```
+
+That adds 6 companies, 12 students, 8 job profiles across active, ended, and
+draft states, plus applications, announcements, feedback, NOC requests, and
+placement team members. Run `npm run db:remove-demo` to take it all out again.
+
+Two details worth knowing. The seed needs an administrator to exist first,
+because job profiles and announcements record an author and `ADMIN_EMAILS` is the
+only legitimate source of one — run `npm run db:seed` before the demo seed if the
+database is brand new. And the demonstration students exist only as records: they
+have no Google account behind them, so they populate the admin views but cannot
+sign in.
+
+Every row is written with a deterministic `demo-` prefixed id, which is what
+makes the seed safe to re-run and lets the removal script delete exactly what it
+created without touching real records. Dates are stored in the dataset as offsets
+rather than fixed timestamps, so registration deadlines stay in the future however
+long the archive sits in the repository.
+
+To change the data, edit the JSON in `database/seed-data/` and repack it:
+
+```bash
+npm run db:pack:demo
+```
+
 ## Authentication and access control
 
 Sign-in is Google-only; there are no password accounts. A user record is created
@@ -208,6 +240,9 @@ Run these from the repository root; they delegate to the right workspace.
 | `npm run db:migrate` | Create/apply a development migration |
 | `npm run db:deploy` | Apply existing migrations (used by the `migrate` container) |
 | `npm run db:seed` | Create the administrator accounts listed in `ADMIN_EMAILS` |
+| `npm run db:seed:demo` | Load the demonstration dataset from `database/seed-data.zip` |
+| `npm run db:remove-demo` | Delete everything the demonstration seed created |
+| `npm run db:pack:demo` | Rebuild `seed-data.zip` after editing `database/seed-data/` |
 | `npm run db:sync-admins` | Promote listed admins and demote unlisted ones |
 | `npm run db:studio` | Open Prisma Studio |
 

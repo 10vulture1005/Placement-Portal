@@ -1,5 +1,8 @@
 import { PrismaClient, Role } from "@prisma/client";
 import { parseAdminEmails } from "../src/admin-emails";
+import { loadRootEnv } from "../src/load-root-env";
+
+loadRootEnv();
 
 const db = new PrismaClient();
 

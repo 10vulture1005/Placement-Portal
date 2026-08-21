@@ -1,0 +1,38 @@
+[
+  {
+    "slug": "cgpa-cutoff-query",
+    "studentSlug": "rohan-mehta",
+    "feedbackType": "QUERY",
+    "content": "My CGPA is 7.4 and the Zoho drive lists a 7.0 cutoff, but the portal still shows me as ineligible for one profile. Could you check whether the backlog count is being applied correctly?",
+    "resolved": false,
+    "createdDaysAgo": 4
+  },
+  {
+    "slug": "portal-praise",
+    "studentSlug": "isha-verma",
+    "feedbackType": "FEEDBACK",
+    "content": "The new application tracker is a big improvement. Being able to see the shortlist status without emailing the coordinators saves a lot of time.",
+    "resolved": true,
+    "adminResponse": "Thank you for the note. We will keep iterating on the tracker.",
+    "createdDaysAgo": 9,
+    "resolvedDaysAgo": 7
+  },
+  {
+    "slug": "slot-clash-complaint",
+    "studentSlug": "vivaan-gupta",
+    "feedbackType": "COMPLAINT",
+    "content": "Two interview slots were scheduled at the same time on the same day and I was marked absent for one of them. Requesting a review of the attendance record.",
+    "resolved": false,
+    "createdDaysAgo": 2
+  },
+  {
+    "slug": "noc-turnaround-query",
+    "studentSlug": "arjun-desai",
+    "feedbackType": "QUERY",
+    "content": "How long does an NOC request usually take to be approved? I need it before the offer deadline at the end of the month.",
+    "resolved": true,
+    "adminResponse": "NOC requests are processed within three working days of submission.",
+    "createdDaysAgo": 15,
+    "resolvedDaysAgo": 13
+  }
+]

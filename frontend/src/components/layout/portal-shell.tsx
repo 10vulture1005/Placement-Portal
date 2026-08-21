@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Bell, BriefcaseBusiness, Building2, CircleUserRound, ClipboardList, FileQuestion, FileText, LayoutDashboard, LogOut, Menu, Phone, Users, X } from "lucide-react";
@@ -22,7 +23,7 @@ export function PortalShell({ children, student }: { children: React.ReactNode; 
     {open && <button className="backdrop" onClick={() => setOpen(false)} aria-label="Close navigation" />}
     <aside className={`sidebar ${open ? "sidebar-open" : ""}`}>
       <button className="close-button" onClick={() => setOpen(false)} aria-label="Close navigation"><X /></button>
-      <div className="brand"><div className="brand-mark">T&P</div><div><strong>Placement Cell</strong><span>IIIT Lucknow</span></div></div>
+      <div className="brand"><div className="brand-mark"><Image src="/iiitl-emblem.png" alt="" width={34} height={27} priority /></div><div><strong>Placement Cell</strong><span>IIIT Lucknow</span></div></div>
       <nav aria-label="Main navigation">{navigation.map(([label, href, Icon]) => <Link key={href} href={href} onClick={() => setOpen(false)} className={pathname === href ? "active" : ""}><Icon size={19} /><span>{label}</span></Link>)}</nav>
       <div className="sidebar-help"><Bell size={18} /><div><strong>Need assistance?</strong><span>Contact the placement team</span></div></div>
     </aside>

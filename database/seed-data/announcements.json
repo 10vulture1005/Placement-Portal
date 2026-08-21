@@ -1,0 +1,36 @@
+[
+  {
+    "slug": "atlassian-pre-placement-talk",
+    "title": "Atlassian pre-placement talk",
+    "companySlug": "atlassian",
+    "category": "COMPANY_EVENT",
+    "tags": ["pre-placement-talk", "software"],
+    "content": "Atlassian will host a pre-placement talk in the main auditorium. Engineering leads will cover the interview process and the teams that are hiring. Attendance is mandatory for registered candidates.",
+    "createdDaysAgo": 14
+  },
+  {
+    "slug": "deutsche-bank-shortlist",
+    "title": "Deutsche Bank shortlist published",
+    "companySlug": "deutsche-bank",
+    "category": "COMPANY_EVENT",
+    "tags": ["shortlist", "internship"],
+    "content": "The shortlist for the Technology Analyst internship has been published. Shortlisted candidates should check their application status and confirm their interview slot within 48 hours.",
+    "createdDaysAgo": 5
+  },
+  {
+    "slug": "resume-deadline",
+    "title": "Resume verification closes this Friday",
+    "category": "GENERAL",
+    "tags": ["resume", "deadline"],
+    "content": "All final-year students must upload a verified resume before Friday. Applications submitted without a verified resume will not be forwarded to recruiters.",
+    "createdDaysAgo": 8
+  },
+  {
+    "slug": "placement-policy-update",
+    "title": "Updated placement policy for the current cycle",
+    "category": "GENERAL",
+    "tags": ["policy"],
+    "content": "The one-offer policy now applies once a student accepts a full-time role above 15 LPA. Internship conversions are counted separately. The full policy document is available with the placement office.",
+    "createdDaysAgo": 25
+  }
+]

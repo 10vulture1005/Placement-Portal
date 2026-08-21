@@ -1,0 +1,42 @@
+[
+  {
+    "slug": "arjun-offcampus-noc",
+    "studentSlug": "arjun-desai",
+    "company": "Postman",
+    "address": "Ground Floor, Tower B, Golf Course Road",
+    "city": "Bengaluru",
+    "state": "Karnataka",
+    "pincode": "560103",
+    "startDaysFromNow": 30,
+    "durationDays": 180,
+    "status": "PENDING",
+    "message": "Off-campus internship offer received. Requesting an NOC so I can accept before the deadline."
+  },
+  {
+    "slug": "meera-research-noc",
+    "studentSlug": "meera-krishnan",
+    "company": "Indian Institute of Science",
+    "address": "CV Raman Road",
+    "city": "Bengaluru",
+    "state": "Karnataka",
+    "pincode": "560012",
+    "startDaysFromNow": 45,
+    "durationDays": 90,
+    "status": "APPROVED",
+    "message": "Summer research internship with the systems lab."
+  },
+  {
+    "slug": "vivaan-startup-noc",
+    "studentSlug": "vivaan-gupta",
+    "company": "Unregistered Startup",
+    "address": "Sector 62",
+    "city": "Noida",
+    "state": "Uttar Pradesh",
+    "pincode": "201309",
+    "startDaysFromNow": 20,
+    "durationDays": 120,
+    "status": "REJECTED",
+    "message": "Requesting NOC for an off-campus role.",
+    "documentUrl": null
+  }
+]

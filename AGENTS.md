@@ -36,7 +36,7 @@ Never silently change an established architectural decision. Record intentional 
 - Sensitive identity values must use the AES-256-GCM helpers in `frontend/src/lib/encryption.ts` and `backend/app/core/encryption.py`; never log or return raw Aadhaar/PAN values.
 - Resume uploads must be PDF-only, size-limited, and authorized by user ownership when persistence is added.
 - Keep secrets in `.env`; never commit, print, or copy real secrets into documentation.
-- Use the established navy/orange design tokens and existing responsive shells.
+- Use the logo-derived design tokens declared in `frontend/src/app/globals.css` (`--blue`, `--navy`, `--navy-deep`, `--green`, `--orange`, `--brown`) and the existing responsive shells. Do not introduce new literal brand hex values.
 - Prefer shared components and `src/lib` business functions over duplicating logic inside pages.
 - Do not describe local component state as database persistence.
 

@@ -1,0 +1,34 @@
+[
+  {
+    "slug": "faculty-incharge",
+    "name": "Dr. Rajesh Kumar",
+    "role": "Faculty In-charge, Training & Placement",
+    "email": "tnp.faculty@iiitl.ac.in",
+    "phone": "9000001001",
+    "displayOrder": 1
+  },
+  {
+    "slug": "placement-officer",
+    "name": "Sunita Menon",
+    "role": "Placement Officer",
+    "email": "tnp.officer@iiitl.ac.in",
+    "phone": "9000001002",
+    "displayOrder": 2
+  },
+  {
+    "slug": "student-coordinator-lead",
+    "name": "Aarav Sharma",
+    "role": "Student Placement Coordinator (Lead)",
+    "email": "demo.aarav.sharma@iiitl.ac.in",
+    "phone": "9000000001",
+    "displayOrder": 3
+  },
+  {
+    "slug": "student-coordinator-internships",
+    "name": "Isha Verma",
+    "role": "Student Placement Coordinator (Internships)",
+    "email": "demo.isha.verma@iiitl.ac.in",
+    "phone": "9000000002",
+    "displayOrder": 4
+  }
+]

@@ -28,11 +28,25 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(db),
   session: { strategy: "jwt" },
   pages: { signIn: "/login", error: "/login" },
-  providers: [Google({ authorization: { params: { prompt: "select_account" } } })],
+  providers: [
+    Google({
+      // The seed inserts administrator rows from ADMIN_EMAILS before anyone has
+      // signed in, so an administrator's first Google sign-in always meets an
+      // existing user row that has no linked Account. Auth.js refuses to link
+      // those by default and fails with OAuthAccountNotLinked. Linking on email
+      // is safe here because Google is the only provider and the signIn callback
+      // below rejects an address Google has not verified.
+      allowDangerousEmailAccountLinking: true,
+      authorization: { params: { prompt: "select_account" } },
+    }),
+  ],
   callbacks: {
     async signIn({ profile, user }) {
       const email = (profile?.email ?? user.email)?.toLowerCase();
       if (!canUseGoogleAccount(email)) return false;
+      // Guards the account linking enabled above: without proof that Google
+      // verified the address, linking would let one account claim another's row.
+      if (profile && profile.email_verified === false) return false;
 
       // Reconcile the stored role on every sign-in so that editing
       // ADMIN_EMAILS both grants and revokes access. New users are handled by

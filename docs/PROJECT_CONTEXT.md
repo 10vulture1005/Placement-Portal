@@ -69,10 +69,16 @@ The reusable eligibility rules live in `frontend/src/lib/eligibility.ts` and `ba
 
 ## UI system
 
-- Primary navy: `#102A43` / deep navy surfaces
-- Action orange: `#F97316`
-- Blue: `#2563EB`
-- Surface: `#F5F7FB`
+The palette is sampled from the institute logo (`frontend/public/iiitl-logo.png`)
+and declared as CSS custom properties in `frontend/src/app/globals.css`. Use the
+tokens rather than new literal hex values.
+
+- Primary blue: `#005F99` (`--blue`) — the logo letterforms
+- Deep blue: `#00446D` (`--navy`) and `#002F4D` (`--navy-deep`) — sidebars, banners
+- Circuit green: `#008325` (`--green`) — success and positive states
+- Arch orange: `#DE6C1A` (`--orange`) — eyebrows, CTAs, active markers
+- Brown: `#782D0D` (`--brown`) — deep warm accents
+- Surface: `#F5F7FB` (`--surface`), ink `#102033`, muted `#64748B`, border `#E2E8F0`
 - Rounded cards, restrained shadows, high information density, and mobile-first responsive layouts
 - Student pages use `PortalShell`; admin pages use `AdminShell`.
 - Use CSS transitions only unless the architecture decision is deliberately changed.

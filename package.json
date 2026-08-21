@@ -15,12 +15,15 @@
     "dev": "npm run dev --workspace @tnp/frontend",
     "build": "npm run build --workspace @tnp/frontend",
     "lint": "npm run lint --workspace @tnp/frontend",
-    "type-check": "npm run type-check --workspace @tnp/frontend",
+    "type-check": "npm run type-check --workspace @tnp/frontend && npm run type-check --workspace @tnp/database",
     "test": "npm run test --workspace @tnp/frontend",
     "db:generate": "npm run generate --workspace @tnp/database",
     "db:migrate": "npm run migrate --workspace @tnp/database",
     "db:deploy": "npm run deploy --workspace @tnp/database",
     "db:seed": "npm run seed --workspace @tnp/database",
+    "db:pack:demo": "npm run pack-demo --workspace @tnp/database",
+    "db:seed:demo": "npm run seed-demo --workspace @tnp/database",
+    "db:remove-demo": "npm run remove-demo --workspace @tnp/database",
     "db:sync-admins": "npm run sync-admins --workspace @tnp/database",
     "db:studio": "npm run studio --workspace @tnp/database"
   }

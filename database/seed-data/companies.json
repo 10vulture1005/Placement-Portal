@@ -1,0 +1,38 @@
+[
+  {
+    "slug": "atlassian",
+    "name": "Atlassian",
+    "website": "https://www.atlassian.com",
+    "description": "Collaboration software for teams, including Jira and Confluence."
+  },
+  {
+    "slug": "zoho",
+    "name": "Zoho Corporation",
+    "website": "https://www.zoho.com",
+    "description": "Privately held business software suite spanning CRM, finance, and productivity."
+  },
+  {
+    "slug": "deutsche-bank",
+    "name": "Deutsche Bank",
+    "website": "https://www.db.com",
+    "description": "Global investment bank with a large technology centre in Pune and Bengaluru."
+  },
+  {
+    "slug": "texas-instruments",
+    "name": "Texas Instruments",
+    "website": "https://www.ti.com",
+    "description": "Analog and embedded processing semiconductor company."
+  },
+  {
+    "slug": "sprinklr",
+    "name": "Sprinklr",
+    "website": "https://www.sprinklr.com",
+    "description": "Unified customer experience management platform."
+  },
+  {
+    "slug": "cisco",
+    "name": "Cisco Systems",
+    "website": "https://www.cisco.com",
+    "description": "Networking hardware, software, and security infrastructure."
+  }
+]
