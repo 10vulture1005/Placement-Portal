@@ -147,15 +147,36 @@ npm run db:seed:demo
 ```
 
 That adds 6 companies, 12 students, 8 job profiles across active, ended, and
-draft states, plus applications, announcements, feedback, NOC requests, and
+draft states, 29 applications, 9 announcements, 7 NOC requests, feedback, and
 placement team members. Run `npm run db:remove-demo` to take it all out again.
 
-Two details worth knowing. The seed needs an administrator to exist first,
-because job profiles and announcements record an author and `ADMIN_EMAILS` is the
-only legitimate source of one — run `npm run db:seed` before the demo seed if the
-database is brand new. And the demonstration students exist only as records: they
-have no Google account behind them, so they populate the admin views but cannot
-sign in.
+### Populating your own account
+
+The generated students have no Google account behind them, so they fill the admin
+views but cannot sign in. Browse the student portal as yourself and Applications,
+NOC requests, and My feedbacks are all empty, because that activity belongs to
+students who do not exist as logins.
+
+Pass your own address to attach a slice of the activity to your account:
+
+```bash
+npm run db:seed:demo -- you@iiitl.ac.in
+```
+
+You get 5 applications spanning applied, shortlisted, interview, and rejected, 2
+NOC requests, and 2 feedback entries. Academic fields are filled in **only where
+your profile has none**, so nothing you entered yourself is overwritten. The
+address must already have signed in once; the script says so rather than creating
+the account. Use a bare address, not `--student` — `npm run` claims unknown
+`--flags` for itself and never forwards them.
+
+`npm run db:remove-demo` deletes this activity too but keeps your account. The
+profile fields it filled are left in place, since there is no way to tell them
+apart from values you later edited; clear them from the profile page if you want.
+
+One more prerequisite: the seed needs an administrator to exist, because job
+profiles and announcements record an author and `ADMIN_EMAILS` is the only
+legitimate source of one. Run `npm run db:seed` first on a brand-new database.
 
 Every row is written with a deterministic `demo-` prefixed id, which is what
 makes the seed safe to re-run and lets the removal script delete exactly what it
@@ -241,6 +262,7 @@ Run these from the repository root; they delegate to the right workspace.
 | `npm run db:deploy` | Apply existing migrations (used by the `migrate` container) |
 | `npm run db:seed` | Create the administrator accounts listed in `ADMIN_EMAILS` |
 | `npm run db:seed:demo` | Load the demonstration dataset from `database/seed-data.zip` |
+| `npm run db:seed:demo -- you@iiitl.ac.in` | Same, and attach activity to your signed-in account |
 | `npm run db:remove-demo` | Delete everything the demonstration seed created |
 | `npm run db:pack:demo` | Rebuild `seed-data.zip` after editing `database/seed-data/` |
 | `npm run db:sync-admins` | Promote listed admins and demote unlisted ones |

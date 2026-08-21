@@ -145,6 +145,25 @@ interface TeamRecord {
   displayOrder: number;
 }
 
+interface PersonalActivity {
+  profile: {
+    branch: string;
+    degree: string;
+    batchOffset: number;
+    gender: string;
+    category: string;
+    contactNumber: string;
+    class10Percent: number;
+    class12Percent: number;
+    semGPAs: number[];
+    cgpa: number;
+    backlogs: number;
+  };
+  applications: { jobSlug: string; status: ApplicationStatus; appliedDaysAgo: number }[];
+  nocRequests: (Omit<NocRecord, "studentSlug">)[];
+  feedback: (Omit<FeedbackRecord, "studentSlug">)[];
+}
+
 function openArchive() {
   if (!existsSync(archivePath)) {
     throw new Error(
@@ -390,6 +409,141 @@ async function seedTeamMembers(records: TeamRecord[]) {
   }
 }
 
+/**
+ * Collects the accounts to attach activity to, from any of:
+ *   npm run db:seed:demo -- you@iiitl.ac.in
+ *   DEMO_STUDENT_EMAILS="a@x,b@y" npm run db:seed:demo
+ *
+ * Bare addresses are the documented form because `npm run` claims unknown
+ * `--flags` as its own config and never forwards them to the script.
+ */
+function requestedStudentEmails() {
+  const argv = process.argv.slice(2);
+  const emails: string[] = [];
+
+  for (let i = 0; i < argv.length; i += 1) {
+    const arg = argv[i];
+    if (arg === "--student" && argv[i + 1]) {
+      emails.push(argv[i + 1]);
+      i += 1;
+    } else if (arg.startsWith("--student=")) {
+      emails.push(arg.slice("--student=".length));
+    } else if (!arg.startsWith("-") && arg.includes("@")) {
+      emails.push(arg);
+    }
+  }
+
+  emails.push(...(process.env.DEMO_STUDENT_EMAILS ?? "").split(","));
+
+  return [...new Set(emails.map((email) => email.trim().toLowerCase()).filter(Boolean))];
+}
+
+/**
+ * Gives a real, signed-in account its own applications, NOC requests, and
+ * feedback. The generated students cannot sign in, so without this the student
+ * portal is empty for whoever is actually browsing it. Rows still carry `demo-`
+ * ids and so are removed by `npm run db:remove-demo`; the account itself is not.
+ */
+async function seedPersonalActivity(
+  emails: string[],
+  activity: PersonalActivity,
+  jobIds: Map<string, string>,
+) {
+  let attached = 0;
+
+  for (const email of emails) {
+    const user = await db.user.findFirst({
+      where: { email },
+      select: {
+        id: true, email: true, branch: true, degree: true, batch: true, gender: true,
+        category: true, contactNumber: true, class10Percent: true, class12Percent: true,
+        semGPAs: true, cgpa: true,
+      },
+    });
+
+    if (!user) {
+      console.warn(`  ! no account exists for ${email}. Sign in once with that address, then re-run.`);
+      continue;
+    }
+
+    // Only fill gaps: never overwrite what a real person entered themselves.
+    const p = activity.profile;
+    const patch: Record<string, unknown> = {};
+    if (user.branch === null) patch.branch = p.branch;
+    if (user.degree === null) patch.degree = p.degree;
+    if (user.batch === null) patch.batch = currentYear + p.batchOffset;
+    if (user.gender === null) patch.gender = p.gender;
+    if (user.category === null) patch.category = p.category;
+    if (user.contactNumber === null) patch.contactNumber = p.contactNumber;
+    if (user.class10Percent === null) patch.class10Percent = p.class10Percent;
+    if (user.class12Percent === null) patch.class12Percent = p.class12Percent;
+    if (user.cgpa === null) patch.cgpa = p.cgpa;
+    if (user.semGPAs.length === 0) patch.semGPAs = p.semGPAs;
+    if (Object.keys(patch).length > 0) {
+      await db.user.update({ where: { id: user.id }, data: patch });
+    }
+
+    for (const record of activity.applications) {
+      const jobProfileId = lookup(jobIds, record.jobSlug, "job", `personal activity for ${email}`);
+      const appliedAt = offsetDays(-record.appliedDaysAgo);
+      await db.application.upsert({
+        where: { userId_jobProfileId: { userId: user.id, jobProfileId } },
+        update: { status: record.status, appliedAt },
+        create: {
+          id: demoId("personal-application", `${user.id}-${record.jobSlug}`),
+          userId: user.id,
+          jobProfileId,
+          status: record.status,
+          appliedAt,
+        },
+      });
+    }
+
+    for (const record of activity.nocRequests) {
+      const id = demoId("personal-noc", `${user.id}-${record.slug}`);
+      const data = {
+        userId: user.id,
+        company: record.company,
+        address: record.address,
+        city: record.city,
+        state: record.state,
+        pincode: record.pincode,
+        startDate: offsetDays(record.startDaysFromNow),
+        endDate: offsetDays(record.startDaysFromNow + record.durationDays),
+        status: record.status,
+        message: record.message ?? null,
+        documentUrl: record.documentUrl ?? null,
+      };
+      await db.nocRequest.upsert({ where: { id }, update: data, create: { id, ...data } });
+    }
+
+    for (const record of activity.feedback) {
+      const id = demoId("personal-feedback", `${user.id}-${record.slug}`);
+      const data = {
+        userId: user.id,
+        feedbackType: record.feedbackType,
+        content: record.content,
+        resolved: record.resolved,
+        adminResponse: record.adminResponse ?? null,
+        createdAt: offsetDays(-record.createdDaysAgo),
+        resolvedAt:
+          record.resolvedDaysAgo === undefined ? null : offsetDays(-record.resolvedDaysAgo),
+      };
+      await db.feedback.upsert({ where: { id }, update: data, create: { id, ...data } });
+    }
+
+    const filled = Object.keys(patch).length;
+    console.log(
+      `  attached to ${email}: ${activity.applications.length} applications, ` +
+        `${activity.nocRequests.length} NOC requests, ${activity.feedback.length} feedback` +
+        (filled > 0 ? `, and filled ${filled} empty profile field(s)` : ""),
+    );
+    attached += 1;
+  }
+
+  return attached;
+}
+
 async function main() {
   const zip = openArchive();
   const adminId = await resolveAdministratorId();
@@ -402,6 +556,8 @@ async function main() {
   const feedback = readEntry<FeedbackRecord[]>(zip, "feedback.json");
   const nocRequests = readEntry<NocRecord[]>(zip, "noc-requests.json");
   const teamMembers = readEntry<TeamRecord[]>(zip, "team-members.json");
+  const personalActivity = readEntry<PersonalActivity>(zip, "personal-activity.json");
+  const studentEmails = requestedStudentEmails();
 
   const companyIds = await seedCompanies(companies);
   const studentIds = await seedStudents(students);
@@ -421,6 +577,18 @@ async function main() {
   console.log(`  feedback       ${feedback.length}`);
   console.log(`  NOC requests   ${nocRequests.length}`);
   console.log(`  team members   ${teamMembers.length}`);
+
+  if (studentEmails.length > 0) {
+    console.log("Attaching activity to signed-in accounts:");
+    await seedPersonalActivity(studentEmails, personalActivity, jobIds);
+  } else {
+    console.log(
+      "The generated students cannot sign in, so your own student pages stay empty.\n" +
+        "Give your account its own applications, NOC requests, and feedback with:\n" +
+        "  npm run db:seed:demo -- you@iiitl.ac.in",
+    );
+  }
+
   console.log('Remove it again with "npm run db:remove-demo".');
 }
 

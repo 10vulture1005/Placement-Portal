@@ -1,0 +1,67 @@
+{
+  "_comment": "Attached to a real signed-in account with: npm run db:seed:demo -- you@iiitl.ac.in. The generated students cannot sign in, so without this the student portal looks empty when you browse it as yourself. Profile fields are only written where the account has none.",
+  "profile": {
+    "branch": "CSE",
+    "degree": "B.Tech",
+    "batchOffset": 1,
+    "gender": "Female",
+    "category": "General",
+    "contactNumber": "9000009000",
+    "class10Percent": 93.6,
+    "class12Percent": 92.4,
+    "semGPAs": [8.7, 8.9, 8.8, 9.0, 8.9, 9.1],
+    "cgpa": 8.9,
+    "backlogs": 0
+  },
+  "applications": [
+    { "jobSlug": "atlassian-swe", "status": "INTERVIEW", "appliedDaysAgo": 11 },
+    { "jobSlug": "deutsche-bank-analyst-intern", "status": "SHORTLISTED", "appliedDaysAgo": 5 },
+    { "jobSlug": "zoho-member-technical-staff", "status": "APPLIED", "appliedDaysAgo": 3 },
+    { "jobSlug": "texas-instruments-hardware", "status": "APPLIED", "appliedDaysAgo": 2 },
+    { "jobSlug": "cisco-network-engineer", "status": "REJECTED", "appliedDaysAgo": 40 }
+  ],
+  "nocRequests": [
+    {
+      "slug": "personal-offcampus",
+      "company": "Atlan",
+      "address": "Sector 44, Cyber City",
+      "city": "Gurugram",
+      "state": "Haryana",
+      "pincode": "122003",
+      "startDaysFromNow": 35,
+      "durationDays": 180,
+      "status": "PENDING",
+      "message": "Off-campus internship offer. Requesting an NOC ahead of the acceptance deadline."
+    },
+    {
+      "slug": "personal-research",
+      "company": "IIT Kanpur",
+      "address": "Kalyanpur",
+      "city": "Kanpur",
+      "state": "Uttar Pradesh",
+      "pincode": "208016",
+      "startDaysFromNow": 55,
+      "durationDays": 60,
+      "status": "APPROVED",
+      "message": "Short research engagement over the summer break."
+    }
+  ],
+  "feedback": [
+    {
+      "slug": "personal-eligibility-query",
+      "feedbackType": "QUERY",
+      "content": "The Texas Instruments profile lists an 8.5 CGPA cutoff and mine is 8.9, but the eligibility panel took a while to update after I saved my academic details. Is there a refresh delay?",
+      "resolved": true,
+      "adminResponse": "Eligibility recalculates on save. The panel you saw was a cached page; a reload shows the current result.",
+      "createdDaysAgo": 12,
+      "resolvedDaysAgo": 10
+    },
+    {
+      "slug": "personal-schedule-feedback",
+      "feedbackType": "FEEDBACK",
+      "content": "It would help to see interview slots on the applications page instead of only in email. Right now I have to cross-check both to know where I stand.",
+      "resolved": false,
+      "createdDaysAgo": 4
+    }
+  ]
+}

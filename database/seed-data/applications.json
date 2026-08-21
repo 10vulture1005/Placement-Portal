@@ -4,24 +4,33 @@
   { "studentSlug": "ananya-iyer", "jobSlug": "atlassian-swe", "status": "SHORTLISTED", "appliedDaysAgo": 11 },
   { "studentSlug": "saanvi-rao", "jobSlug": "atlassian-swe", "status": "SHORTLISTED", "appliedDaysAgo": 10 },
   { "studentSlug": "kabir-nair", "jobSlug": "atlassian-swe", "status": "REJECTED", "appliedDaysAgo": 12 },
+  { "studentSlug": "arjun-desai", "jobSlug": "atlassian-swe", "status": "APPLIED", "appliedDaysAgo": 9 },
 
   { "studentSlug": "rohan-mehta", "jobSlug": "zoho-member-technical-staff", "status": "APPLIED", "appliedDaysAgo": 6 },
   { "studentSlug": "meera-krishnan", "jobSlug": "zoho-member-technical-staff", "status": "SHORTLISTED", "appliedDaysAgo": 7 },
   { "studentSlug": "arjun-desai", "jobSlug": "zoho-member-technical-staff", "status": "APPLIED", "appliedDaysAgo": 5 },
   { "studentSlug": "kabir-nair", "jobSlug": "zoho-member-technical-staff", "status": "WITHDRAWN", "appliedDaysAgo": 8 },
+  { "studentSlug": "aarav-sharma", "jobSlug": "zoho-member-technical-staff", "status": "APPLIED", "appliedDaysAgo": 6 },
+  { "studentSlug": "vivaan-gupta", "jobSlug": "zoho-member-technical-staff", "status": "REJECTED", "appliedDaysAgo": 7 },
 
   { "studentSlug": "aarav-sharma", "jobSlug": "deutsche-bank-analyst-intern", "status": "APPLIED", "appliedDaysAgo": 4 },
   { "studentSlug": "ananya-iyer", "jobSlug": "deutsche-bank-analyst-intern", "status": "INTERVIEW", "appliedDaysAgo": 5 },
   { "studentSlug": "arjun-desai", "jobSlug": "deutsche-bank-analyst-intern", "status": "APPLIED", "appliedDaysAgo": 3 },
+  { "studentSlug": "isha-verma", "jobSlug": "deutsche-bank-analyst-intern", "status": "SHORTLISTED", "appliedDaysAgo": 5 },
+  { "studentSlug": "kabir-nair", "jobSlug": "deutsche-bank-analyst-intern", "status": "APPLIED", "appliedDaysAgo": 4 },
 
   { "studentSlug": "isha-verma", "jobSlug": "texas-instruments-hardware", "status": "APPLIED", "appliedDaysAgo": 2 },
   { "studentSlug": "saanvi-rao", "jobSlug": "texas-instruments-hardware", "status": "APPLIED", "appliedDaysAgo": 2 },
   { "studentSlug": "diya-chatterjee", "jobSlug": "texas-instruments-hardware", "status": "SHORTLISTED", "appliedDaysAgo": 3 },
+  { "studentSlug": "ananya-iyer", "jobSlug": "texas-instruments-hardware", "status": "REJECTED", "appliedDaysAgo": 3 },
 
   { "studentSlug": "navya-reddy", "jobSlug": "sprinklr-product-intern", "status": "APPLIED", "appliedDaysAgo": 1 },
   { "studentSlug": "aditya-joshi", "jobSlug": "sprinklr-product-intern", "status": "APPLIED", "appliedDaysAgo": 1 },
+  { "studentSlug": "diya-chatterjee", "jobSlug": "sprinklr-product-intern", "status": "SHORTLISTED", "appliedDaysAgo": 2 },
 
   { "studentSlug": "vivaan-gupta", "jobSlug": "cisco-network-engineer", "status": "REJECTED", "appliedDaysAgo": 40 },
   { "studentSlug": "rohan-mehta", "jobSlug": "cisco-network-engineer", "status": "SELECTED", "appliedDaysAgo": 41 },
-  { "studentSlug": "meera-krishnan", "jobSlug": "cisco-network-engineer", "status": "REJECTED", "appliedDaysAgo": 40 }
+  { "studentSlug": "meera-krishnan", "jobSlug": "cisco-network-engineer", "status": "REJECTED", "appliedDaysAgo": 40 },
+  { "studentSlug": "kabir-nair", "jobSlug": "cisco-network-engineer", "status": "REJECTED", "appliedDaysAgo": 42 },
+  { "studentSlug": "ananya-iyer", "jobSlug": "cisco-network-engineer", "status": "WITHDRAWN", "appliedDaysAgo": 41 }
 ]

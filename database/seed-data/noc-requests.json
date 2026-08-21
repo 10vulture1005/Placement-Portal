@@ -38,5 +38,57 @@
     "status": "REJECTED",
     "message": "Requesting NOC for an off-campus role.",
     "documentUrl": null
+  },
+  {
+    "slug": "rohan-fintech-noc",
+    "studentSlug": "rohan-mehta",
+    "company": "Razorpay",
+    "address": "SJR Cyber, Laskar Hosur Road",
+    "city": "Bengaluru",
+    "state": "Karnataka",
+    "pincode": "560030",
+    "startDaysFromNow": 60,
+    "durationDays": 180,
+    "status": "PENDING",
+    "message": "Six-month off-campus internship in the payments team, starting after end-semester examinations."
+  },
+  {
+    "slug": "diya-remote-noc",
+    "studentSlug": "diya-chatterjee",
+    "company": "GitLab",
+    "address": "Remote engagement, reporting to the Bengaluru entity",
+    "city": "Kolkata",
+    "state": "West Bengal",
+    "pincode": "700091",
+    "startDaysFromNow": 25,
+    "durationDays": 150,
+    "status": "APPROVED",
+    "message": "Fully remote internship. No relocation required and coursework is unaffected."
+  },
+  {
+    "slug": "aditya-summer-noc",
+    "studentSlug": "aditya-joshi",
+    "company": "Zerodha",
+    "address": "153/154 4th Cross, JP Nagar 4th Phase",
+    "city": "Bengaluru",
+    "state": "Karnataka",
+    "pincode": "560078",
+    "startDaysFromNow": 40,
+    "durationDays": 60,
+    "status": "PENDING",
+    "message": "Short summer engagement between semesters."
+  },
+  {
+    "slug": "navya-research-noc",
+    "studentSlug": "navya-reddy",
+    "company": "Microsoft Research India",
+    "address": "Vigyan, 9 Lavelle Road",
+    "city": "Bengaluru",
+    "state": "Karnataka",
+    "pincode": "560001",
+    "startDaysFromNow": 70,
+    "durationDays": 90,
+    "status": "APPROVED",
+    "message": "Research internship offer in the machine learning group."
   }
 ]

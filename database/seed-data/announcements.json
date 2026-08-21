@@ -32,5 +32,48 @@
     "tags": ["policy"],
     "content": "The one-offer policy now applies once a student accepts a full-time role above 15 LPA. Internship conversions are counted separately. The full policy document is available with the placement office.",
     "createdDaysAgo": 25
+  },
+  {
+    "slug": "zoho-drive-schedule",
+    "title": "Zoho campus drive scheduled for next week",
+    "companySlug": "zoho",
+    "category": "COMPANY_EVENT",
+    "tags": ["campus-drive", "software", "schedule"],
+    "content": "The Zoho drive will run over two days. Day one is the online programming round in the computer centre; day two covers the design discussion and the final technical interview. Bring your institute ID card.",
+    "createdDaysAgo": 3
+  },
+  {
+    "slug": "texas-instruments-ppt",
+    "title": "Texas Instruments technical session on digital design",
+    "companySlug": "texas-instruments",
+    "category": "COMPANY_EVENT",
+    "tags": ["pre-placement-talk", "hardware"],
+    "content": "A technical session covering RTL design, verification workflows, and the day-to-day work of the embedded processing group. Recommended for anyone considering the hardware track.",
+    "createdDaysAgo": 6
+  },
+  {
+    "slug": "mock-interview-drive",
+    "title": "Mock interview drive open for registration",
+    "category": "GENERAL",
+    "tags": ["preparation", "interviews"],
+    "content": "Alumni volunteers will conduct mock technical and HR interviews over the coming fortnight. Slots are limited and allocated first come, first served. Register through the placement coordinators.",
+    "createdDaysAgo": 11
+  },
+  {
+    "slug": "sprinklr-internship-window",
+    "title": "Sprinklr internship applications now open",
+    "companySlug": "sprinklr",
+    "category": "COMPANY_EVENT",
+    "tags": ["internship", "software", "pre-final-year"],
+    "content": "The Sprinklr product engineering internship is open to the pre-final year. Strong performers convert to a full-time offer. Applications close along with the registration deadline listed on the job profile.",
+    "createdDaysAgo": 2
+  },
+  {
+    "slug": "noc-process-reminder",
+    "title": "How to raise an NOC request",
+    "category": "GENERAL",
+    "tags": ["noc", "process"],
+    "content": "Students holding an off-campus offer must raise an NOC request through the portal before accepting it. Include the offer letter and the exact engagement dates. Requests are processed within three working days.",
+    "createdDaysAgo": 18
   }
 ]
