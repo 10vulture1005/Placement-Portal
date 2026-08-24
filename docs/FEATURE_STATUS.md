@@ -13,7 +13,7 @@ The **Data path** column records which service reaches the database, because mov
 | Apply flow | Partial | Prisma direct | Authorized eligibility recheck and unique Application creation persist | Port to FastAPI; store the selected resume on each application |
 | Applications | Persistent | Prisma direct | User-owned applications, status timeline, and guarded withdrawal persist | Port to FastAPI; add status history and interview scheduling |
 | Profile | Partial | FastAPI | Identity and core profile fields read/write through the backend | Add encrypted Aadhaar/PAN entry |
-| Resumes | Partial | FastAPI | Typed list and PDF/size-validated upload call the backend | Storage provider is still unselected; see the blocker below |
+| Resumes | Persistent | FastAPI (Cloudinary) | Full upload/list/delete cycle implemented. PDF magic-byte + size validation on the backend. `publicId` stored for targeted Cloudinary deletion. Upload + delete UI live on `/profile`. | Store the selected resume on each application |
 | Feedback | Partial | Mixed | Submission calls FastAPI; listing still reads Prisma directly | Port listing to FastAPI; add admin response action and notifications |
 | Forms/NOC | Partial | FastAPI | Typed list and create call the backend | Add cancel plus admin approval and document storage |
 | Contact/Team | Local | none | Public directory presentation | Read TeamMember records through FastAPI |
@@ -22,11 +22,12 @@ The **Data path** column records which service reaches the database, because mov
 | Admin job profiles | Persistent | Prisma direct | Authorized create, edit, list, filter, publish/end, guarded delete | Port to FastAPI; add attachments and coordinators |
 | Admin students | Persistent | Prisma direct | Authorized searchable directory and read-only detail | Port to FastAPI; add cohort filters and export |
 | Remaining admin management | Planned | none | Honest implementation states with no fake records | Add guarded FastAPI endpoints, starting with announcements and applications |
-| File uploads | Planned | FastAPI (Cloudinary) | Endpoint and PDF/size validation exist; no provider credentials configured | Choose and configure a provider; enforce ownership |
+| File uploads | Persistent | FastAPI (Cloudinary) | Resume upload fully implemented end-to-end. NOC document upload available for admin. Cloudinary credentials must be set in `.env`. | Add logo/attachment uploads for jobs and companies |
 | Email/notifications | Planned | none | Notification schema exists | Configure Resend and event-driven messages |
 | Encryption | Persistent utility | n/a | AES-256-GCM helper and tests exist in both services | Integrate into profile write paths |
 | CI/Docker | Persistent | n/a | Per-service Dockerfiles, prod and dev Compose stacks, one-shot migration container, health routes, three-job CI. Verified end to end: all images build and the stack reaches healthy with migrations and admin seeding applied. | Add a deployment target and production secrets |
 
 ## Open blockers
 
-- **Resume/document storage provider is unselected.** `backend/app/core/storage.py` is written against Cloudinary and no credentials are configured, so uploads cannot succeed yet. Choosing a provider (Cloudinary, S3, or a self-hosted MinIO container added to Compose) is a decision that belongs in `docs/DECISIONS.md`.
+- **Cloudinary credentials required.** Add `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, and `CLOUDINARY_API_SECRET` to `.env` before testing resume uploads locally or in CI.
+

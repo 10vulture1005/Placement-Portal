@@ -84,11 +84,16 @@ async def delete_resume(
     )
     if not resume:
         raise HTTPException(status_code=404, detail="Resume not found")
-    
-    from app.core.storage import delete_file
-    # Assuming public_id is stored or derivable; for now just delete DB record
-    # delete_file(resume.fileUrl)
-    
+
+    # Remove the stored asset from Cloudinary (best-effort; don't block the DB delete)
+    if resume.publicId:
+        from app.core.storage import delete_file
+        try:
+            delete_file(resume.publicId)
+        except Exception:
+            pass  # Log in production; do not surface Cloudinary errors to the client
+
     await db.delete(resume)
     await db.commit()
     return {"message": "Resume deleted"}
+

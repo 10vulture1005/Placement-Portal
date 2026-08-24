@@ -251,9 +251,11 @@ class Resume(Base):
     label: Mapped[str] = mapped_column(String)
     fileUrl: Mapped[str] = mapped_column(String)
     fileName: Mapped[str] = mapped_column(String)
+    publicId: Mapped[str | None] = mapped_column(String, nullable=True)
     uploadedAt: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     user: Mapped["User"] = relationship(back_populates="resumes")
+
 
 
 class Coordinator(Base):

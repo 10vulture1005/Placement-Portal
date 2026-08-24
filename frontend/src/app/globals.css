@@ -915,6 +915,7 @@ button { cursor: pointer; }
 .resumes-card { grid-column: 1/-1; }
 .resumes-card header button { margin-left: auto; display: flex; align-items: center; border: 0; background: var(--navy); color: #fff; border-radius: 8px; padding: 8px 11px; font-size: 10px; }
 .resumes-card header button svg { width: 14px; }
+#resume-upload-btn:disabled { cursor: default; }
 .resumes-card > div { display: grid; gap: 8px; }
 .resumes-card > div > span { display: flex; align-items: center; gap: 11px; border: 1px solid var(--border); border-radius: 10px; padding: 11px; background: var(--card-bg); }
 .resumes-card > div > span > i { display: grid; place-items: center; width: 35px; height: 35px; background: var(--badge-orange-bg); color: var(--orange); border-radius: 8px; }
@@ -927,6 +928,14 @@ button { cursor: pointer; }
 .resumes-card > div button { border: 0; background: transparent; color: var(--muted); }
 .resumes-card > div button:last-child { color: var(--badge-red-text); }
 .resumes-card > div button svg { width: 16px; }
+.resumes-card > div a { display: grid; place-items: center; color: var(--blue); text-decoration: none; }
+.resumes-card > div a svg { width: 16px; }
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.spin { animation: spin 0.8s linear infinite; }
 
 /* Feedback & Guidelines */
 .feedback-form { max-width: 820px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 15px; padding: 24px; margin-top: 28px; box-shadow: var(--card-shadow); }

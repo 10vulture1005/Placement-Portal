@@ -229,6 +229,7 @@ model Resume {
   label      String
   fileUrl    String
   fileName   String
+  publicId   String?
   uploadedAt DateTime @default(now())
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

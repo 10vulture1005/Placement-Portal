@@ -52,6 +52,7 @@ export default async function Page() {
       label: resume.label,
       name: resume.fileName,
       uploadedAt: resume.uploadedAt,
+      fileUrl: resume.fileUrl,
     })),
   };
 
