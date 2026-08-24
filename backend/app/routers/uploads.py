@@ -1,59 +1,111 @@
-from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
+from typing import Optional
+import uuid
+from fastapi import APIRouter, Depends, Form, HTTPException, UploadFile, File
+from fastapi.responses import FileResponse
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.dependencies import get_db, require_student, require_admin
+
+from app.core.config import settings
+from app.core.security import is_admin_email
+from app.core.storage import get_local_file_path, upload_pdf, validate_pdf
+from app.dependencies import get_current_user, get_db, require_admin, require_student
 from app.models.db import Resume
-from app.core.storage import validate_pdf, upload_pdf
+from app.schemas.student import ResumeResponse
 
 router = APIRouter(prefix="/uploads", tags=["uploads"])
 
-@router.post("/resume")
+
+@router.post("/resume", response_model=ResumeResponse)
 async def upload_resume(
     file: UploadFile = File(...),
+    label: Optional[str] = Form(None),
     user_payload: dict = Depends(require_student),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ):
-    from sqlalchemy import select, func
-    from app.core.config import settings
-    import uuid
-
     # Check limits
-    count = await db.scalar(select(func.count(Resume.id)).where(Resume.userId == user_payload["sub"]))
+    count = await db.scalar(
+        select(func.count(Resume.id)).where(Resume.userId == user_payload["sub"])
+    )
     if count and count >= settings.max_resumes_per_student:
-        raise HTTPException(status_code=400, detail="Maximum resumes limit reached")
+        raise HTTPException(
+            status_code=400,
+            detail=f"Maximum resumes limit reached ({settings.max_resumes_per_student}).",
+        )
 
     content = await file.read()
     try:
         validate_pdf(content)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
-    
-    # Upload to Cloudinary
-    result = upload_pdf(content, folder=f"resumes/{user_payload['sub']}", public_id=str(uuid.uuid4()))
-    
+
+    # Upload to Cloudinary or local disk
+    result = upload_pdf(
+        content,
+        folder=f"resumes/{user_payload['sub']}",
+        public_id=str(uuid.uuid4()),
+    )
+
+    resume_label = (label or "").strip() or file.filename or "Resume"
     resume = Resume(
         id=str(uuid.uuid4()),
         userId=user_payload["sub"],
-        label=file.filename or "Resume",
+        label=resume_label,
         fileUrl=result["secure_url"],
-        fileName=file.filename or "Resume.pdf"
+        fileName=file.filename or "Resume.pdf",
     )
     db.add(resume)
     await db.commit()
     await db.refresh(resume)
-    
+
     return resume
+
 
 @router.post("/admin/noc-document")
 async def upload_noc_document(
     file: UploadFile = File(...),
-    admin_payload: dict = Depends(require_admin)
+    admin_payload: dict = Depends(require_admin),
 ):
-    import uuid
     content = await file.read()
     try:
         validate_pdf(content)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
-    
+
     result = upload_pdf(content, folder="noc_docs", public_id=str(uuid.uuid4()))
     return {"url": result["secure_url"]}
+
+
+@router.get("/files/{file_path:path}")
+async def get_uploaded_file(
+    file_path: str,
+    token_payload: dict = Depends(get_current_user),
+):
+    user_id = token_payload.get("sub")
+    user_role = token_payload.get("role")
+    user_email = token_payload.get("email", "")
+    is_admin = user_role == "ADMIN" or is_admin_email(user_email)
+
+    clean_path = file_path.lstrip("/")
+    if ".." in clean_path or "\\" in clean_path:
+        raise HTTPException(status_code=400, detail="Invalid path characters.")
+
+    local_path = get_local_file_path(clean_path)
+    if not local_path:
+        raise HTTPException(status_code=404, detail="File not found.")
+
+    # Security: Non-admin students can only access files in their own folder
+    if not is_admin:
+        from app.core.storage import LOCAL_UPLOADS_DIR
+        try:
+            resolved_rel = str(local_path.relative_to(LOCAL_UPLOADS_DIR.resolve()))
+            if not resolved_rel.startswith(f"resumes/{user_id}/"):
+                raise HTTPException(status_code=403, detail="Not authorized to access this file.")
+        except ValueError:
+            raise HTTPException(status_code=403, detail="Not authorized to access this file.")
+
+    return FileResponse(
+        path=local_path,
+        media_type="application/pdf",
+        headers={"Content-Disposition": "inline; filename=document.pdf"},
+    )
+

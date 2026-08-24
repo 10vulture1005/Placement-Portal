@@ -29,11 +29,12 @@ export function companyColor(name: string) {
   return colors[hash % colors.length];
 }
 
-export function formatPortalDate(date: Date, includeTime = false) {
+export function formatPortalDate(date: Date | string, includeTime = false) {
+  const d = typeof date === "string" ? new Date(date) : date;
   return new Intl.DateTimeFormat("en-IN", {
     day: "2-digit",
     month: "short",
     year: "numeric",
     ...(includeTime ? { hour: "numeric", minute: "2-digit" } : {}),
-  }).format(date);
+  }).format(d);
 }

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import func, select
 from app.dependencies import get_db, require_student
 from app.models.db import JobProfile, JobStatus, User, Resume
 from app.schemas.job import JobResponse
