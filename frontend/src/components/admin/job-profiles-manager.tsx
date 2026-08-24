@@ -119,7 +119,7 @@ export function JobProfilesManager({
         {!visible.length ? <div className="admin-empty"><BriefcaseBusiness/><h2>{jobs.length ? "No matching job profiles" : "No job profiles yet"}</h2><p>{jobs.length ? "Change the search or status filter." : "Add a company, then publish its first real opportunity."}</p></div> : null}
       </section>
       {editing !== undefined ? <div className="modal-backdrop"><form className="modal job-profile-modal" action={submit}>
-        <header><div><span className="eyebrow">Persistent opportunity</span><h2>{editing ? "Edit job profile" : "Add job profile"}</h2></div><button type="button" onClick={() => setEditing(undefined)}><X/></button></header>
+        <header><div><span className="eyebrow">Persistent opportunity</span><h2>{editing ? "Edit job profile" : "Add job profile"}</h2></div><button type="button" onClick={() => setEditing(undefined)} aria-label="Close dialog"><X/></button></header>
         <input type="hidden" name="id" value={editing?.id ?? ""}/>
         <div className="form-grid">
           <label className="wide">Company<select name="companyId" required defaultValue={editing?.companyId ?? ""}><option value="" disabled>Select a company</option>{companies.map((company) => <option value={company.id} key={company.id}>{company.name}</option>)}</select></label>
