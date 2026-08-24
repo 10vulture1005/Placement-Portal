@@ -20,8 +20,8 @@ const commaSeparated = (label: string, required = false) =>
 
 export const jobProfileFormSchema = z
   .object({
-    id: z.union([z.literal(""), z.string().cuid()]).optional(),
-    companyId: z.string().cuid("Select a company."),
+    id: z.string().optional(),
+    companyId: z.string().min(1, "Select a company."),
     title: z.string().trim().min(2, "Enter a role title.").max(160),
     type: z.enum(["INTERNSHIP", "FTE", "INTERNSHIP_PPO", "INTERNSHIP_FTE"]),
     locations: commaSeparated("location", true),
@@ -50,5 +50,5 @@ export const jobProfileFormSchema = z
     }
   });
 
-export const jobProfileDeleteSchema = z.object({ jobProfileId: z.string().cuid() });
+export const jobProfileDeleteSchema = z.object({ jobProfileId: z.string().min(1) });
 

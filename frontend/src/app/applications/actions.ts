@@ -5,7 +5,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { requireStudent } from "@/lib/student-session";
 
-const withdrawalSchema = z.object({ applicationId: z.string().cuid() });
+const withdrawalSchema = z.object({ applicationId: z.string().min(1) });
 
 export async function withdrawApplication(formData: FormData) {
   const parsed = withdrawalSchema.safeParse({

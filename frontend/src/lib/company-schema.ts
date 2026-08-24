@@ -5,11 +5,11 @@ const optionalUrl = z
   .transform((value) => value || null);
 
 export const companyFormSchema = z.object({
-  id: z.union([z.literal(""), z.string().cuid()]).optional(),
+  id: z.string().optional(),
   name: z.string().trim().min(2).max(120),
   website: optionalUrl,
   logoUrl: optionalUrl,
   description: z.string().trim().max(2000).transform((value) => value || null),
 });
 
-export const companyDeleteSchema = z.object({ companyId: z.string().cuid() });
+export const companyDeleteSchema = z.object({ companyId: z.string().min(1) });
