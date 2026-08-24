@@ -3,6 +3,7 @@ import Image from "next/image";
 import { redirect } from "next/navigation";
 import { auth, signIn } from "@/lib/auth";
 import { studentEmailDomain } from "@/lib/auth-access";
+import { ThemeToggle } from "@/components/shared/theme-toggle";
 
 function describeError(code: string | undefined, domain: string) {
   if (!code) return null;
@@ -44,31 +45,55 @@ export default async function LoginPage({
   return (
     <main className="login-page">
       <section className="login-story">
-        <div className="login-brand"><Image src="/iiitl-emblem.png" alt="" width={44} height={35} priority /><span>IIIT Lucknow</span></div>
+        <div className="login-brand">
+          <Image src="/iiitl-emblem.png" alt="" width={44} height={35} priority />
+          <span>IIIT Lucknow</span>
+        </div>
         <div>
           <span className="eyebrow">Training &amp; Placement Cell</span>
-          <h1>Your career journey,<br />all in one place.</h1>
+          <h1>
+            Your career journey,
+            <br />
+            all in one place.
+          </h1>
           <p>Discover opportunities, manage applications, and stay connected with the placement cell.</p>
         </div>
         <small>Indian Institute of Information Technology Lucknow</small>
       </section>
       <section className="login-panel">
+        <div className="login-top-actions">
+          <ThemeToggle />
+        </div>
         <div className="login-card">
-          <div className="login-icon"><ShieldCheck /></div>
+          <div className="login-icon">
+            <ShieldCheck />
+          </div>
           <span className="eyebrow">Student portal</span>
           <h2>Welcome back</h2>
           <p>Sign in with your institute Google account. Your account is created automatically on first sign-in.</p>
           {problem ? (
             <div className="login-alert" role="alert">
               <AlertCircle />
-              <span><strong>{problem.title}</strong>{problem.body}</span>
+              <span>
+                <strong>{problem.title}</strong>
+                {problem.body}
+              </span>
             </div>
           ) : null}
-          <form action={async () => { "use server"; await signIn("google", { redirectTo: "/dashboard" }); }}>
-            <button type="submit"><span className="google-g">G</span>Continue with Google</button>
+          <form
+            action={async () => {
+              "use server";
+              await signIn("google", { redirectTo: "/dashboard" });
+            }}
+          >
+            <button type="submit">
+              <span className="google-g">G</span>
+              Continue with Google
+            </button>
           </form>
           <div className="login-note">
-            Students sign in with <strong>@{domain}</strong> accounts.<br />
+            Students sign in with <strong>@{domain}</strong> accounts.
+            <br />
             Administrator access is granted only to addresses configured by the placement office.
           </div>
         </div>

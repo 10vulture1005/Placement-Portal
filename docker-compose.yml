@@ -82,6 +82,7 @@ services:
       ADMIN_EMAILS: ${ADMIN_EMAILS:-}
       STUDENT_EMAIL_DOMAIN: ${STUDENT_EMAIL_DOMAIN:-iiitl.ac.in}
       ENCRYPTION_KEY: ${ENCRYPTION_KEY:?ENCRYPTION_KEY must be set in .env}
+      NODE_OPTIONS: "--dns-result-order=ipv4first"
     ports:
       - "${FRONTEND_PORT:-3000}:3000"
     depends_on:
