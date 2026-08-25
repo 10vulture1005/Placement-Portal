@@ -13,18 +13,16 @@ try {
 
 /** @type {import('next').NextConfig} */
  
-module.exports = {
-  experimental: {
-    serverActions: {
-      bodySizeLimit: '3mb',
-    },
-  },
-}
 
 const nextConfig: NextConfig = {
   output: "standalone",
   poweredByHeader: false,
   typedRoutes: false,
+    experimental: {
+    serverActions: {
+      bodySizeLimit: "5mb",
+    },
+  },
   async headers() {
     return [{
       source: "/(.*)",
