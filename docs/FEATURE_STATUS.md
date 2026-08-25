@@ -14,8 +14,8 @@ The **Data path** column records which service reaches the database, because mov
 | Applications | Persistent | FastAPI / Prisma fallback | User-owned applications, stage timeline, resume association, and guarded withdrawal persist | Add interview slot booking |
 | Profile | Persistent | FastAPI / Prisma fallback | Identity and core profile fields with AES-256-GCM encrypted Aadhaar/PAN numbers and encrypted identity document files with challenge-unlock preview | Add profile picture upload if needed |
 | Resumes | Persistent | FastAPI / Local & Cloud storage | Typed list, upload with custom labels, rename, delete, secure in-portal PDF preview, and application attachment | Add multi-version comparison |
-| Feedback | Partial | Mixed | Submission calls FastAPI; listing still reads Prisma directly | Port listing to FastAPI; add admin response action and notifications |
-| Forms/NOC | Persistent | FastAPI / Local storage | Typed list, NOC creation with validation; official placement policy and template downloads available | Add cancel plus admin approval and document storage |
+| Feedback | Persistent | FastAPI / Prisma fallback | Student submission, support history with type & status filters, response viewer; Admin response & resolve workflow with notifications and email dispatch | Add conversation threads if required |
+| Forms/NOC | Persistent | FastAPI / Prisma fallback | Typed list, NOC creation with validation, request cancellation, request details modal, and official placement policy downloads | Add multi-department sign-off chain if needed |
 | Contact/Team | Local | none | Public directory presentation | Read TeamMember records through FastAPI |
 | Admin dashboard | Persistent | Prisma direct | Live totals, application funnel, branch placement, recent applications | Port to FastAPI; add date/cohort filters and export |
 | Admin companies | Persistent | Prisma direct | Authorized create, edit, list, search, guarded delete | Port to FastAPI; add logo upload and recruiter contacts |
@@ -23,7 +23,8 @@ The **Data path** column records which service reaches the database, because mov
 | Admin students | Persistent | Prisma direct | Authorized searchable directory and read-only detail | Port to FastAPI; add cohort filters and export |
 | Admin applications | Persistent | FastAPI / Prisma fallback | Authorized candidate list, filtering by job/status/branch, single & bulk stage progression, CSV export | Add custom stage emails |
 | Admin announcements | Persistent | FastAPI / Prisma fallback | Authorized create, edit, list, search, category & company filter, tags management, preview, and guarded delete | Add rich-text editor option and attachment uploads |
-| Remaining admin management | Planned | none | Honest implementation states with no fake records | Add feedback response and NOC approval workflows |
+| Admin NOC requests | Persistent | FastAPI / Prisma fallback | Authorized searchable & filtered list, student academic inspect, approve/reject with remarks, signed PDF upload and in-portal preview, student in-app and email notifications | Add multi-authority digital signature workflow |
+| Admin Feedbacks | Persistent | FastAPI / Prisma fallback | Authorized query & feedback management, type & resolution filters, response modal with resolve toggle, student notification and email dispatch, delete action | Add automated FAQ suggestions |
 | File uploads | Persistent | FastAPI (Cloudinary / Local fallback) | PDF/size validation, local disk fallback with UUID naming, and authenticated streaming route | Add S3 provider option if required |
 | Email/notifications | Persistent | FastAPI / Resend fallback | In-app notification creation with non-blocking email dispatch and graceful dummy-key handling | Add email template customization |
 | Encryption | Persistent utility | n/a | AES-256-GCM helper and tests exist in both services; active on Aadhaar and PAN | Integrate into other sensitive fields as needed |

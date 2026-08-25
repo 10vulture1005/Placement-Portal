@@ -96,5 +96,14 @@ Add new colour work as tokens. Literal brand hex values in component styles are 
 - Added multi-category classification (`COMPANY_EVENT` vs `GENERAL`), associated company tagging, and preset/custom pill tags (Shortlists, Interviews, Drive, PPT, Policies, Urgent).
 - Enhanced student dashboard feed with search by title/content/tags/company, category filtering, tag indicators, and a detail inspection modal for multi-line instructions and test links.
 
+## 2026-08-25 — NOC Requests & Support Feedback Lifecycle Workflows
+
+- **NOC Requests Architecture**: Implemented full student lifecycle (`POST /api/v1/noc`, `PATCH /api/v1/noc/{id}/cancel`, inspection modal, signed certificate in-portal preview and download) and administrative management (`GET /api/v1/noc/admin`, `/approve`, `/reject`, `/document`, `/metrics`) guarded by `noc:manage` permission.
+- **Signed Certificate Handling**: Signed NOC certificates are uploaded through authenticated multipart endpoints to disk storage (`noc_docs/`) and served with authorization checks allowing student owners and placement administrators to view and download their documents.
+- **Feedback & Queries Lifecycle**: Implemented student submission (`POST /api/v1/feedback`) with multi-type categorization (`QUERY`, `FEEDBACK`, `COMPLAINT`) and structured JSON storage; student history with type/resolution filters; and administrative workspace (`GET /api/v1/feedback/admin`, `POST /api/v1/feedback/admin/{id}/respond`, `DELETE`) guarded by `feedbacks:manage` permission.
+- **Student Notifications**: Admin NOC approval/rejection and feedback responses trigger automated in-app `Notification` records and background email dispatch.
+
+
+
 
 
