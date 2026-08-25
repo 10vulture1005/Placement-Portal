@@ -53,6 +53,9 @@ async def upload_resume(
         )
 
     # Read the entire body — size validation happens inside validate_pdf
+
+    MAX_RESUME_BYTES = int(settings.allowed_pdf_size_mb * 1024 * 1024)
+
     content = await file.read()
     if len(content) == 0:
         raise HTTPException(status_code=400, detail="The uploaded file is empty.")

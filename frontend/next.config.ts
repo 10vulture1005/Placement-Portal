@@ -11,6 +11,16 @@ try {
   // No root .env: expected in containers and CI, where values are injected.
 }
 
+/** @type {import('next').NextConfig} */
+ 
+module.exports = {
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '3mb',
+    },
+  },
+}
+
 const nextConfig: NextConfig = {
   output: "standalone",
   poweredByHeader: false,
