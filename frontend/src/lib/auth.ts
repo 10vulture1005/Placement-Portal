@@ -2,8 +2,10 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import { SignJWT } from "jose";
-import { canUseGoogleAccount, resolveRole } from "@/lib/auth-access";
+import { canUseGoogleAccount, isAdminEmail, resolveRole } from "@/lib/auth-access";
+import { computeEffectivePermissions } from "@/lib/permissions";
 import { db } from "@/lib/db";
+import type { Role } from "@prisma/client";
 
 const DEVELOPMENT_SECRET = "tnp-local-development-secret-change-before-production";
 
@@ -48,29 +50,77 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       // verified the address, linking would let one account claim another's row.
       if (profile && profile.email_verified === false) return false;
 
-      // Reconcile the stored role on every sign-in so that editing
-      // ADMIN_EMAILS both grants and revokes access. New users are handled by
-      // the createUser event, which runs after the adapter inserts the row.
-      await db.user.updateMany({ where: { email }, data: { role: resolveRole(email) } });
+      // Reject suspended/inactive user accounts
+      if (email) {
+        const existing = await db.user.findUnique({
+          where: { email },
+          select: { isActive: true },
+        });
+        if (existing && existing.isActive === false) {
+          return false;
+        }
+      }
+
+      // Reconcile the stored role on every sign-in if listed in ADMIN_EMAILS
+      if (isAdminEmail(email)) {
+        await db.user.updateMany({ where: { email }, data: { role: "ADMIN" } });
+      }
       return true;
     },
-    jwt({ token, user }) {
+    async jwt({ token, user }) {
       if (user?.id) {
         token.id = user.id;
         token.email = user.email ?? token.email;
       }
-      // Recomputed on every request so removing an address from ADMIN_EMAILS
-      // takes effect immediately instead of lingering until the session expires.
-      token.role = resolveRole(token.email);
+
+      if (token.email && isAdminEmail(token.email)) {
+        token.role = "ADMIN";
+        token.isActive = true;
+      } else if (token.id) {
+        // Query user's current role, title, active status, and permissions from DB
+        const dbUser = await db.user.findUnique({
+          where: { id: token.id },
+          select: { role: true, title: true, customPermissions: true, isActive: true },
+        });
+        if (dbUser) {
+          token.role = dbUser.role;
+          token.title = dbUser.title;
+          token.isActive = dbUser.isActive;
+          token.customPermissions = dbUser.customPermissions;
+        } else {
+          token.role = resolveRole(token.email);
+          token.isActive = true;
+        }
+      } else {
+        token.role = resolveRole(token.email);
+        token.isActive = true;
+      }
+
+      const effective = computeEffectivePermissions(
+        token.role,
+        token.customPermissions ?? [],
+        token.email,
+      );
+      token.effectivePermissions = effective;
+
       return token;
     },
     async session({ session, token }) {
       session.user.id = token.id;
-      session.user.role = token.role;
+      session.user.role = token.role as Role;
+      session.user.title = token.title;
+      session.user.isActive = token.isActive !== false;
+      session.user.customPermissions = token.customPermissions ?? [];
+      session.user.effectivePermissions = token.effectivePermissions ?? [];
+
       session.accessToken = await new SignJWT({
         sub: token.id,
         email: token.email,
         role: token.role,
+        title: token.title,
+        isActive: token.isActive !== false,
+        customPermissions: token.customPermissions ?? [],
+        permissions: token.effectivePermissions ?? [],
       })
         .setProtectedHeader({ alg: "HS256" })
         .setIssuedAt()

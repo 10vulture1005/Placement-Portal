@@ -6,7 +6,7 @@ The **Data path** column records which service reaches the database, because mov
 
 | Module | Status | Data path | Current boundary | Next backend step |
 |---|---|---|---|---|
-| Authentication/RBAC | Partial | Prisma (Auth.js adapter) | Google-only sign-in; exact-domain student check; `ADMIN_EMAILS` as the sole admin source with per-request role recomputation and login-time reconciliation; backend re-checks the allowlist | Verify production callback/cookies and deployment secrets |
+| Authentication/RBAC | Persistent | FastAPI / Prisma fallback | 5-tier role hierarchy (`STUDENT`, `COORDINATOR`, `OFFICER`, `ADMIN`, `SUPER_ADMIN`), granular 16-permission RBAC catalog, per-user custom permission matrix, user provisioning, elevation/de-elevation, emergency `ADMIN_EMAILS` bootstrap | Verify production callback/cookies and deployment secrets |
 | Database/schema | Persistent | Prisma (owner) | Migrations and seed exist; seed creates accounts from `ADMIN_EMAILS` | Add migrations with each schema change |
 | Dashboard | Persistent | Prisma direct | Authenticated metrics, deadlines, announcements, and eligibility use Prisma records | Port to FastAPI endpoints |
 | Company Events | Persistent | Prisma direct | Admin-published jobs and per-student eligibility use Prisma and shared rules | Port to FastAPI; add attachments and selected-resume association |

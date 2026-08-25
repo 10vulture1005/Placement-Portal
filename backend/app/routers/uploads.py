@@ -6,7 +6,13 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
-from app.core.security import is_admin_email
+from app.core.security import (
+    PERM_APPLICATIONS_READ,
+    PERM_STUDENTS_READ,
+    has_permission,
+    is_admin_email,
+    is_elevated_role,
+)
 from app.core.storage import get_local_file_path, upload_pdf, validate_pdf
 from app.dependencies import get_current_user, get_db, require_admin, require_student
 from app.models.db import Resume
@@ -83,7 +89,12 @@ async def get_uploaded_file(
     user_id = token_payload.get("sub")
     user_role = token_payload.get("role")
     user_email = token_payload.get("email", "")
-    is_admin = user_role == "ADMIN" or is_admin_email(user_email)
+    is_admin = (
+        is_elevated_role(user_role)
+        or is_admin_email(user_email)
+        or has_permission(token_payload, PERM_STUDENTS_READ)
+        or has_permission(token_payload, PERM_APPLICATIONS_READ)
+    )
 
     clean_path = file_path.lstrip("/")
     if ".." in clean_path or "\\" in clean_path:

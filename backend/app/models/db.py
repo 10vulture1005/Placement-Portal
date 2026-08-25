@@ -37,7 +37,10 @@ from app.core.database import Base
 
 class Role(str, enum.Enum):
     STUDENT = "STUDENT"
+    COORDINATOR = "COORDINATOR"
+    OFFICER = "OFFICER"
     ADMIN = "ADMIN"
+    SUPER_ADMIN = "SUPER_ADMIN"
 
 
 class JobType(str, enum.Enum):
@@ -92,6 +95,9 @@ class User(Base):
     emailVerified: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     image: Mapped[str | None] = mapped_column(String, nullable=True)
     role: Mapped[Role] = mapped_column(Enum(Role, name="Role"), default=Role.STUDENT)
+    customPermissions: Mapped[list[str]] = mapped_column(ARRAY(String), default=list)
+    isActive: Mapped[bool] = mapped_column(Boolean, default=True)
+    title: Mapped[str | None] = mapped_column(String, nullable=True)
     personalEmail: Mapped[str | None] = mapped_column(String, nullable=True)
     rollNumber: Mapped[str | None] = mapped_column(String, unique=True, nullable=True)
     branch: Mapped[str | None] = mapped_column(String, nullable=True)

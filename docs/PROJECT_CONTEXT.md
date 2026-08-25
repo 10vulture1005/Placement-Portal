@@ -48,14 +48,15 @@ Important invariants:
 Google is the only sign-in method. There are no password accounts in any environment, and the Auth.js credentials provider has been removed.
 
 - Students must hold a Google account on `STUDENT_EMAIL_DOMAIN` (default `iiitl.ac.in`), matched on the exact domain so lookalike domains are rejected.
-- `ADMIN_EMAILS` is the only source of the `ADMIN` role. There is no built-in administrator; when the variable is empty, nobody is an administrator.
-- An address in `ADMIN_EMAILS` may sign in from outside the institute domain.
-- Roles are recomputed from `ADMIN_EMAILS` on every request and reconciled in the database on every sign-in, so removing an address revokes access immediately.
-- `require_admin` in `backend/app/core/security.py` re-checks the allowlist instead of trusting the signed role claim, so a previously issued token cannot outlive its grant.
-- `/admin/*` additionally requires the `ADMIN` role through `frontend/src/proxy.ts`.
-- The frontend calls the backend with a short-lived HS256 JWT signed with the shared `AUTH_SECRET`.
+- `ADMIN_EMAILS` serves as the emergency bootstrap superadmin allowlist: addresses listed here receive `SUPER_ADMIN` / `ADMIN` rights automatically and may sign in from outside the institute domain.
+- The portal enforces a 5-tier role hierarchy: `STUDENT` (Tier 1), `COORDINATOR` (Tier 2), `OFFICER` (Tier 3), `ADMIN` (Tier 4), `SUPER_ADMIN` (Tier 5), backed by a 16-permission RBAC catalog.
+- In addition to role defaults, any user account supports granular per-user custom permission overrides (`customPermissions String[]` on `User`).
+- Full user lifecycle and RBAC management is available on `/admin/users`, including account provisioning, role elevation & de-elevation, custom permission matrix editing, suspension/activation, and guarded deletion.
+- Guardrails protect against self-demotion, self-deactivation, self-deletion, and removal of the last active super-administrator.
+- `/admin/*` routes enforce granular permissions via `frontend/src/proxy.ts` and `requirePermission()` server-side guards.
+- The frontend calls the backend with a short-lived HS256 JWT signed with the shared `AUTH_SECRET`, embedding effective permissions.
 
-The reusable access rules live in `frontend/src/lib/auth-access.ts` with unit tests. Do not re-implement domain or allowlist checks in a page component.
+The reusable access rules live in `frontend/src/lib/auth-access.ts` and `frontend/src/lib/permissions.ts` with unit tests.
 
 ## Core workflow
 
