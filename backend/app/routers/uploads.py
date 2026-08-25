@@ -15,7 +15,7 @@ from app.core.security import (
 )
 from app.core.storage import get_local_file_path, upload_pdf, validate_pdf
 from app.dependencies import get_current_user, get_db, require_admin, require_student
-from app.models.db import Resume
+from app.models.db import NocRequest, Resume
 from app.schemas.student import ResumeResponse
 
 router = APIRouter(prefix="/uploads", tags=["uploads"])
@@ -85,6 +85,7 @@ async def upload_noc_document(
 async def get_uploaded_file(
     file_path: str,
     token_payload: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ):
     user_id = token_payload.get("sub")
     user_role = token_payload.get("role")
@@ -104,12 +105,24 @@ async def get_uploaded_file(
     if not local_path:
         raise HTTPException(status_code=404, detail="File not found.")
 
-    # Security: Non-admin students can only access files in their own folder
+    # Security: Non-admin students can only access files in their own folder or their own NOC documents
     if not is_admin:
         from app.core.storage import LOCAL_UPLOADS_DIR
         try:
             resolved_rel = str(local_path.relative_to(LOCAL_UPLOADS_DIR.resolve()))
-            if not resolved_rel.startswith(f"resumes/{user_id}/"):
+            is_own_resume = resolved_rel.startswith(f"resumes/{user_id}/")
+            is_noc_doc = False
+            if resolved_rel.startswith("noc_docs/"):
+                doc_record = await db.scalar(
+                    select(NocRequest).where(
+                        NocRequest.userId == user_id,
+                        NocRequest.documentUrl.is_not(None),
+                    )
+                )
+                if doc_record and doc_record.documentUrl and resolved_rel in doc_record.documentUrl:
+                    is_noc_doc = True
+
+            if not (is_own_resume or is_noc_doc):
                 raise HTTPException(status_code=403, detail="Not authorized to access this file.")
         except ValueError:
             raise HTTPException(status_code=403, detail="Not authorized to access this file.")
@@ -119,4 +132,5 @@ async def get_uploaded_file(
         media_type="application/pdf",
         headers={"Content-Disposition": "inline; filename=document.pdf"},
     )
+
 
