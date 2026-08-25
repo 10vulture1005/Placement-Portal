@@ -28,3 +28,20 @@ class TeamMemberResponse(TeamMemberBase):
     id: str
 
     model_config = ConfigDict(from_attributes=True)
+
+class TeamAdminMemberResponse(TeamMemberResponse):
+    userId: Optional[str] = None
+    hasUserAccount: bool = False
+    userRole: Optional[str] = None
+    userActive: Optional[bool] = None
+    userCustomPermissions: list[str] = []
+
+class DefaultPermissionsResponse(BaseModel):
+    defaultPermissions: list[str]
+
+class DefaultPermissionsUpdate(BaseModel):
+    defaultPermissions: list[str]
+    syncExistingMembers: bool = False
+
+class ReorderTeamRequest(BaseModel):
+    items: list[TeamMemberOrderUpdate]

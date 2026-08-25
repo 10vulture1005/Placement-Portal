@@ -10,7 +10,10 @@ export default auth((request) => {
 
   if (pathname.startsWith("/admin")) {
     const isBootstrapAdmin = isAdminEmail(session.user.email);
-    if (!isBootstrapAdmin && !isElevatedRole(session.user.role)) {
+    const hasCustomPerms =
+      (session.user.customPermissions?.length ?? 0) > 0 ||
+      (session.user.effectivePermissions?.length ?? 0) > 0;
+    if (!isBootstrapAdmin && !isElevatedRole(session.user.role) && !hasCustomPerms) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
     if (!canAccessAdminRoute(session.user, pathname)) {

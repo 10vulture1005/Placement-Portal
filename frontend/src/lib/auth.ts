@@ -3,7 +3,7 @@ import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import { SignJWT } from "jose";
 import { canUseGoogleAccount, isAdminEmail, resolveRole } from "@/lib/auth-access";
-import { computeEffectivePermissions } from "@/lib/permissions";
+import { computeEffectivePermissions, ALL_PERMISSIONS } from "@/lib/permissions";
 import { db } from "@/lib/db";
 import type { Role } from "@prisma/client";
 
@@ -144,8 +144,52 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   events: {
     async createUser({ user }) {
       const role = resolveRole(user.email);
-      if (role !== "STUDENT") {
-        await db.user.update({ where: { id: user.id }, data: { role } });
+      const email = user.email?.toLowerCase().trim();
+      let customPermissions: string[] = [];
+
+      if (email) {
+        // Check if user is an existing team member
+        const teamMember = await db.teamMember.findFirst({
+          where: { email: { equals: email, mode: "insensitive" } },
+        });
+        if (teamMember) {
+          try {
+            const setting = await db.systemSetting.findUnique({
+              where: { key: "placement_team_default_permissions" },
+            });
+            if (setting && setting.value) {
+              const parsed = JSON.parse(setting.value);
+              if (Array.isArray(parsed)) {
+                customPermissions = parsed.filter((p) =>
+                  (ALL_PERMISSIONS as readonly string[]).includes(p)
+                );
+              }
+            } else {
+              customPermissions = [
+                "companies:read",
+                "jobs:read",
+                "jobs:manage",
+                "applications:read",
+                "applications:manage",
+                "students:read",
+                "announcements:manage",
+                "analytics:view",
+              ];
+            }
+          } catch {
+            // fallback
+          }
+        }
+      }
+
+      if (role !== "STUDENT" || customPermissions.length > 0) {
+        await db.user.update({
+          where: { id: user.id },
+          data: {
+            role: role !== "STUDENT" ? role : undefined,
+            customPermissions: customPermissions.length > 0 ? customPermissions : undefined,
+          },
+        });
       }
     },
   },

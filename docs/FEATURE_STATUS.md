@@ -16,7 +16,8 @@ The **Data path** column records which service reaches the database, because mov
 | Resumes | Persistent | FastAPI / Local & Cloud storage | Typed list, upload with custom labels, rename, delete, secure in-portal PDF preview, and application attachment | Add multi-version comparison |
 | Feedback | Persistent | FastAPI / Prisma fallback | Student submission, support history with type & status filters, response viewer; Admin response & resolve workflow with notifications and email dispatch | Add conversation threads if required |
 | Forms/NOC | Persistent | FastAPI / Prisma fallback | Typed list, NOC creation with validation, request cancellation, request details modal, and official placement policy downloads | Add multi-department sign-off chain if needed |
-| Contact/Team | Local | none | Public directory presentation | Read TeamMember records through FastAPI |
+| Contact/Team | Persistent | FastAPI / Prisma fallback | Public team and contact presentation with dynamic database records | Add photo uploads via Cloudinary if needed |
+| Admin Team | Persistent | FastAPI / Prisma fallback | Authorized team management, display reordering, linked user RBAC auto-grant/revoke, and configurable default placement team permissions | Add coordinator cohort history if needed |
 | Admin dashboard | Persistent | Prisma direct | Live totals, application funnel, branch placement, recent applications | Port to FastAPI; add date/cohort filters and export |
 | Admin companies | Persistent | Prisma direct | Authorized create, edit, list, search, guarded delete | Port to FastAPI; add logo upload and recruiter contacts |
 | Admin job profiles | Persistent | Prisma direct | Authorized create, edit, list, filter, publish/end, guarded delete | Port to FastAPI; add attachments and coordinators |
