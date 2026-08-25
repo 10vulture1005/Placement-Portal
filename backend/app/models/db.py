@@ -106,7 +106,11 @@ class User(Base):
     currentAddress: Mapped[str | None] = mapped_column(Text, nullable=True)
     permanentAddress: Mapped[str | None] = mapped_column(Text, nullable=True)
     aadhaarEncrypted: Mapped[str | None] = mapped_column(String, nullable=True)
+    aadhaarDocUrl: Mapped[str | None] = mapped_column(String, nullable=True)
+    aadhaarDocFileName: Mapped[str | None] = mapped_column(String, nullable=True)
     panCardEncrypted: Mapped[str | None] = mapped_column(String, nullable=True)
+    panCardDocUrl: Mapped[str | None] = mapped_column(String, nullable=True)
+    panCardDocFileName: Mapped[str | None] = mapped_column(String, nullable=True)
     class10Percent: Mapped[float | None] = mapped_column(Float, nullable=True)
     class12Percent: Mapped[float | None] = mapped_column(Float, nullable=True)
     semGPAs: Mapped[list[float]] = mapped_column(ARRAY(Float), default=list)
@@ -188,7 +192,7 @@ class Application(Base):
 
     user: Mapped["User"] = relationship(back_populates="applications")
     job_profile: Mapped["JobProfile"] = relationship(back_populates="applications")
-    resume: Mapped["Resume | None"] = relationship()
+    resume: Mapped["Resume | None"] = relationship(back_populates="applications")
 
 
 class Announcement(Base):
@@ -254,6 +258,7 @@ class Resume(Base):
     uploadedAt: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     user: Mapped["User"] = relationship(back_populates="resumes")
+    applications: Mapped[list["Application"]] = relationship(back_populates="resume")
 
 
 class Coordinator(Base):

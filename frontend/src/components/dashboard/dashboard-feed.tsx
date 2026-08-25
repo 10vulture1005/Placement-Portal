@@ -1,6 +1,15 @@
 "use client";
 
-import { BellRing, BriefcaseBusiness, Building2, CalendarDays, ChevronRight, Clock3, Search, Sparkles } from "lucide-react";
+import {
+  BellRing,
+  BriefcaseBusiness,
+  Building2,
+  CalendarDays,
+  ChevronRight,
+  Clock3,
+  Search,
+  Sparkles,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 
 export type DashboardFeedData = {
@@ -44,15 +53,130 @@ export function DashboardFeed({ data }: { data: DashboardFeedData }) {
     [data.announcements, query, filter],
   );
 
-  return <div className="dashboard">
-    <section className="welcome"><div><span className="eyebrow">{data.dateLabel}</span><h1>Welcome, {data.studentName.split(" ")[0]} <span>👋</span></h1><p>Here’s what’s happening with placements today.</p></div>{data.nextDeadline ? <div className="deadline"><Clock3 /><div><span>Next deadline</span><strong>{data.nextDeadline.company} · {data.nextDeadline.date}</strong></div><ChevronRight /></div> : null}</section>
-    <section className="metrics">
-      <article><div className="metric-icon blue"><BriefcaseBusiness /></div><div><span>Open opportunities</span><strong>{data.metrics.openOpportunities}</strong><small>{data.metrics.closingThisWeek} closing this week</small></div></article>
-      <article><div className="metric-icon orange"><CalendarDays /></div><div><span>My applications</span><strong>{data.metrics.applications}</strong><small>{data.metrics.underReview} under review</small></div></article>
-      <article><div className="metric-icon green"><Sparkles /></div><div><span>Eligible roles</span><strong>{data.metrics.eligibleRoles ?? "—"}</strong><small>{data.metrics.eligibleRoles === null ? "Complete your profile to calculate" : "Based on your profile"}</small></div></article>
-    </section>
-    <section className="feed-header"><div><div className="section-icon"><BellRing /></div><div><h2>Announcements</h2><p>Latest opportunities and important updates</p></div></div></section>
-    <section className="filters"><label><Search size={19} /><input value={query} onChange={event => setQuery(event.target.value)} placeholder="Search announcements or companies" /></label><div>{filters.map(item => <button className={filter === item ? "selected" : ""} onClick={() => setFilter(item)} key={item}>{item}</button>)}</div></section>
-    <section className="announcement-list">{visible.length ? visible.map(item => <article key={item.id}><div className="company-logo" style={{ background: item.color }}>{item.initial}</div><div className="announcement-copy"><div className="announcement-meta"><span>{item.company}</span><i>•</i><span>{item.date}</span></div><h3>{item.title}</h3><p>{item.summary}</p><span className={`tag ${item.type.toLowerCase().replaceAll(" ", "-")}`}>{item.type}</span></div></article>) : <div className="empty"><Building2 /><h3>No announcements yet</h3><p>New placement updates will appear here when published.</p></div>}</section>
-  </div>;
+  return (
+    <div className="dashboard">
+      <section className="welcome">
+        <div>
+          <span className="eyebrow">{data.dateLabel}</span>
+          <h1>
+            Welcome, {data.studentName.split(" ")[0]} <span>👋</span>
+          </h1>
+          <p>Here’s what’s happening with campus placements today.</p>
+        </div>
+        {data.nextDeadline ? (
+          <div className="deadline">
+            <Clock3 />
+            <div>
+              <span>Next deadline</span>
+              <strong>
+                {data.nextDeadline.company} · {data.nextDeadline.date}
+              </strong>
+            </div>
+            <ChevronRight />
+          </div>
+        ) : null}
+      </section>
+
+      <section className="metrics">
+        <article>
+          <div className="metric-icon blue">
+            <BriefcaseBusiness />
+          </div>
+          <div>
+            <span>Open opportunities</span>
+            <strong>{data.metrics.openOpportunities}</strong>
+            <small>{data.metrics.closingThisWeek} closing this week</small>
+          </div>
+        </article>
+        <article>
+          <div className="metric-icon orange">
+            <CalendarDays />
+          </div>
+          <div>
+            <span>My applications</span>
+            <strong>{data.metrics.applications}</strong>
+            <small>{data.metrics.underReview} active in pipeline</small>
+          </div>
+        </article>
+        <article>
+          <div className="metric-icon green">
+            <Sparkles />
+          </div>
+          <div>
+            <span>Eligible roles</span>
+            <strong>{data.metrics.eligibleRoles ?? "—"}</strong>
+            <small>
+              {data.metrics.eligibleRoles === null
+                ? "Complete profile to calculate"
+                : "Based on your academic profile"}
+            </small>
+          </div>
+        </article>
+      </section>
+
+      <section className="feed-header">
+        <div>
+          <div className="section-icon">
+            <BellRing />
+          </div>
+          <div>
+            <h2>Announcements & Drives</h2>
+            <p>Latest hiring updates, tests, and shortlist publications</p>
+          </div>
+        </div>
+      </section>
+
+      <section className="filters">
+        <label>
+          <Search size={18} />
+          <input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search announcements, companies, or drive types..."
+          />
+        </label>
+        <div>
+          {filters.map((item) => (
+            <button
+              className={filter === item ? "selected" : ""}
+              onClick={() => setFilter(item)}
+              key={item}
+            >
+              {item}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section className="announcement-list">
+        {visible.length ? (
+          visible.map((item) => (
+            <article key={item.id}>
+              <div className="company-logo" style={{ background: item.color }}>
+                {item.initial}
+              </div>
+              <div className="announcement-copy">
+                <div className="announcement-meta">
+                  <span>{item.company}</span>
+                  <i>•</i>
+                  <span>{item.date}</span>
+                </div>
+                <h3>{item.title}</h3>
+                <p>{item.summary}</p>
+                <span className={`tag ${item.type.toLowerCase().replaceAll(" ", "-")}`}>
+                  {item.type}
+                </span>
+              </div>
+            </article>
+          ))
+        ) : (
+          <div className="empty">
+            <Building2 />
+            <h3>No announcements found</h3>
+            <p>Placement notifications and updates will appear here when published.</p>
+          </div>
+        )}
+      </section>
+    </div>
+  );
 }

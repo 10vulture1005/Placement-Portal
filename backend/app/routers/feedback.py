@@ -24,7 +24,6 @@ async def submit_feedback(
     db: AsyncSession = Depends(get_db)
 ):
     import uuid
-    import json
     fb = Feedback(
         id=str(uuid.uuid4()),
         userId=user_payload["sub"],

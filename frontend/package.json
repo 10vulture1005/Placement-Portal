@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint .",
     "type-check": "tsc --noEmit",
-    "test": "node --import tsx --test src/lib/auth-access.test.ts src/lib/company-schema.test.ts src/lib/job-profile-schema.test.ts src/lib/eligibility.test.ts src/lib/encryption.test.ts src/lib/student-profile.test.ts"
+    "test": "node --import tsx --test src/lib/auth-access.test.ts src/lib/company-schema.test.ts src/lib/job-profile-schema.test.ts src/lib/application-schema.test.ts src/lib/eligibility.test.ts src/lib/encryption.test.ts src/lib/student-profile.test.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.2",

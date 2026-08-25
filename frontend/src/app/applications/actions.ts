@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { backendFetch } from "@/lib/api-client";
 import { db } from "@/lib/db";
 import { requireStudent } from "@/lib/student-session";
 
@@ -16,15 +17,23 @@ export async function withdrawApplication(formData: FormData) {
   const student = await requireStudent();
   if (!student.user) return;
 
-  await db.application.updateMany({
-    where: {
-      id: parsed.data.applicationId,
-      userId: student.user.id,
-      status: { in: ["APPLIED", "SHORTLISTED"] },
-    },
-    data: { status: "WITHDRAWN" },
-  });
+  try {
+    await backendFetch(`/api/v1/applications/${parsed.data.applicationId}/withdraw`, {
+      method: "PATCH",
+    });
+  } catch {
+    // Prisma fallback
+    await db.application.updateMany({
+      where: {
+        id: parsed.data.applicationId,
+        userId: student.user.id,
+        status: { in: ["APPLIED", "SHORTLISTED"] },
+      },
+      data: { status: "WITHDRAWN" },
+    });
+  }
 
   revalidatePath("/applications");
   revalidatePath("/dashboard");
 }
+
