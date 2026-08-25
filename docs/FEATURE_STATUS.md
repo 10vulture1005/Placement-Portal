@@ -22,7 +22,8 @@ The **Data path** column records which service reaches the database, because mov
 | Admin job profiles | Persistent | Prisma direct | Authorized create, edit, list, filter, publish/end, guarded delete | Port to FastAPI; add attachments and coordinators |
 | Admin students | Persistent | Prisma direct | Authorized searchable directory and read-only detail | Port to FastAPI; add cohort filters and export |
 | Admin applications | Persistent | FastAPI / Prisma fallback | Authorized candidate list, filtering by job/status/branch, single & bulk stage progression, CSV export | Add custom stage emails |
-| Remaining admin management | Planned | none | Honest implementation states with no fake records | Add guarded FastAPI endpoints for announcements |
+| Admin announcements | Persistent | FastAPI / Prisma fallback | Authorized create, edit, list, search, category & company filter, tags management, preview, and guarded delete | Add rich-text editor option and attachment uploads |
+| Remaining admin management | Planned | none | Honest implementation states with no fake records | Add feedback response and NOC approval workflows |
 | File uploads | Persistent | FastAPI (Cloudinary / Local fallback) | PDF/size validation, local disk fallback with UUID naming, and authenticated streaming route | Add S3 provider option if required |
 | Email/notifications | Persistent | FastAPI / Resend fallback | In-app notification creation with non-blocking email dispatch and graceful dummy-key handling | Add email template customization |
 | Encryption | Persistent utility | n/a | AES-256-GCM helper and tests exist in both services; active on Aadhaar and PAN | Integrate into other sensitive fields as needed |

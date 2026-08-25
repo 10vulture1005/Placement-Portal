@@ -85,6 +85,7 @@ export default async function DashboardPage() {
           (announcement.category === "COMPANY_EVENT" ? "Company event" : "Update"),
         category:
           announcement.category === "COMPANY_EVENT" ? "Company event" : "General",
+        tags: announcement.tags || [],
         color: companyColor(companyName),
         initial: companyInitials(companyName),
       };
