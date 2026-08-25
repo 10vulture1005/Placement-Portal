@@ -13,10 +13,19 @@ const DEVELOPMENT_SECRET = "tnp-local-development-secret-change-before-productio
 // module with NODE_ENV=production and no secret available, so throwing here
 // would break the production image build.
 function authSecret() {
-  return (
-    process.env.AUTH_SECRET ??
-    (process.env.NODE_ENV === "production" ? undefined : DEVELOPMENT_SECRET)
-  );
+  const secret = process.env.AUTH_SECRET?.trim();
+  if (secret) return secret;
+  return process.env.NODE_ENV === "production" ? undefined : DEVELOPMENT_SECRET;
+}
+
+function googleClientId() {
+  const id = (process.env.AUTH_GOOGLE_ID ?? process.env.GOOGLE_CLIENT_ID)?.trim();
+  return id || undefined;
+}
+
+function googleClientSecret() {
+  const secret = (process.env.AUTH_GOOGLE_SECRET ?? process.env.GOOGLE_CLIENT_SECRET)?.trim();
+  return secret || undefined;
 }
 
 function requireAuthSecret() {
@@ -27,11 +36,14 @@ function requireAuthSecret() {
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   secret: authSecret(),
+  trustHost: true,
   adapter: PrismaAdapter(db),
   session: { strategy: "jwt" },
   pages: { signIn: "/login", error: "/login" },
   providers: [
     Google({
+      clientId: googleClientId(),
+      clientSecret: googleClientSecret(),
       // The seed inserts administrator rows from ADMIN_EMAILS before anyone has
       // signed in, so an administrator's first Google sign-in always meets an
       // existing user row that has no linked Account. Auth.js refuses to link

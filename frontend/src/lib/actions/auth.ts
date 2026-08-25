@@ -3,5 +3,6 @@
 import { signOut } from "@/lib/auth";
 
 export async function handleSignOut() {
-  await signOut();
+  await signOut({ redirectTo: "/login" });
 }
+

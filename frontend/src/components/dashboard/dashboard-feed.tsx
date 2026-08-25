@@ -4,13 +4,28 @@ import {
   BellRing,
   BriefcaseBusiness,
   Building2,
+  Calendar,
   CalendarDays,
   ChevronRight,
   Clock3,
   Search,
   Sparkles,
+  X,
 } from "lucide-react";
 import { useMemo, useState } from "react";
+
+export type DashboardAnnouncement = {
+  id: string;
+  company: string;
+  title: string;
+  summary: string;
+  date: string;
+  type: string;
+  category: "Company event" | "General";
+  tags?: string[];
+  color: string;
+  initial: string;
+};
 
 export type DashboardFeedData = {
   studentName: string;
@@ -23,17 +38,7 @@ export type DashboardFeedData = {
     eligibleRoles: number | null;
   };
   nextDeadline: { company: string; date: string } | null;
-  announcements: Array<{
-    id: string;
-    company: string;
-    title: string;
-    summary: string;
-    date: string;
-    type: string;
-    category: "Company event" | "General";
-    color: string;
-    initial: string;
-  }>;
+  announcements: DashboardAnnouncement[];
 };
 
 const filters = ["All", "Company event", "General"] as const;
@@ -41,12 +46,14 @@ const filters = ["All", "Company event", "General"] as const;
 export function DashboardFeed({ data }: { data: DashboardFeedData }) {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<(typeof filters)[number]>("All");
+  const [selectedAnnouncement, setSelectedAnnouncement] = useState<DashboardAnnouncement | null>(null);
+
   const visible = useMemo(
     () =>
       data.announcements.filter(
         (announcement) =>
           (filter === "All" || announcement.category === filter) &&
-          `${announcement.title} ${announcement.company} ${announcement.type}`
+          `${announcement.title} ${announcement.company} ${announcement.type} ${(announcement.tags || []).join(" ")}`
             .toLowerCase()
             .includes(query.toLowerCase()),
       ),
@@ -151,7 +158,19 @@ export function DashboardFeed({ data }: { data: DashboardFeedData }) {
       <section className="announcement-list">
         {visible.length ? (
           visible.map((item) => (
-            <article key={item.id}>
+            <article
+              key={item.id}
+              onClick={() => setSelectedAnnouncement(item)}
+              style={{ cursor: "pointer" }}
+              tabIndex={0}
+              role="button"
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  setSelectedAnnouncement(item);
+                }
+              }}
+            >
               <div className="company-logo" style={{ background: item.color }}>
                 {item.initial}
               </div>
@@ -163,9 +182,29 @@ export function DashboardFeed({ data }: { data: DashboardFeedData }) {
                 </div>
                 <h3>{item.title}</h3>
                 <p>{item.summary}</p>
-                <span className={`tag ${item.type.toLowerCase().replaceAll(" ", "-")}`}>
-                  {item.type}
-                </span>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginTop: 8 }}>
+                  <span className={`tag ${item.type.toLowerCase().replaceAll(" ", "-")}`}>
+                    {item.type}
+                  </span>
+                  {item.tags && item.tags.length > 1
+                    ? item.tags.slice(1, 4).map((t) => (
+                        <span
+                          key={t}
+                          style={{
+                            fontSize: 9,
+                            padding: "3px 8px",
+                            borderRadius: 9999,
+                            background: "var(--surface-alt)",
+                            border: "1px solid var(--border)",
+                            color: "var(--ink)",
+                            fontWeight: 700,
+                          }}
+                        >
+                          {t}
+                        </span>
+                      ))
+                    : null}
+                </div>
               </div>
             </article>
           ))
@@ -177,6 +216,130 @@ export function DashboardFeed({ data }: { data: DashboardFeedData }) {
           </div>
         )}
       </section>
+
+      {/* STUDENT ANNOUNCEMENT DETAIL MODAL */}
+      {selectedAnnouncement ? (
+        <div className="modal-backdrop" onClick={() => setSelectedAnnouncement(null)}>
+          <div
+            className="modal"
+            style={{ width: "min(680px, 100%)" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <header>
+              <div>
+                <span className="eyebrow">{selectedAnnouncement.category}</span>
+                <h2>{selectedAnnouncement.title}</h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedAnnouncement(null)}
+                aria-label="Close dialog"
+              >
+                <X />
+              </button>
+            </header>
+
+            <div style={{ padding: "16px 0", display: "grid", gap: 14 }}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  padding: "10px 14px",
+                  background: "var(--surface-alt)",
+                  borderRadius: 10,
+                  border: "1px solid var(--border)",
+                  fontSize: 11,
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <div
+                    style={{
+                      width: 28,
+                      height: 28,
+                      borderRadius: 8,
+                      background: selectedAnnouncement.color,
+                      color: "#fff",
+                      display: "grid",
+                      placeItems: "center",
+                      fontSize: 12,
+                      fontWeight: 800,
+                    }}
+                  >
+                    {selectedAnnouncement.initial}
+                  </div>
+                  <strong style={{ color: "var(--ink)" }}>
+                    {selectedAnnouncement.company}
+                  </strong>
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    color: "var(--muted)",
+                  }}
+                >
+                  <Calendar size={13} />
+                  <span>{selectedAnnouncement.date}</span>
+                </div>
+              </div>
+
+              {selectedAnnouncement.tags && selectedAnnouncement.tags.length > 0 ? (
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                  {selectedAnnouncement.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      style={{
+                        fontSize: 10,
+                        fontWeight: 700,
+                        padding: "3px 8px",
+                        borderRadius: 9999,
+                        background: "var(--badge-blue-bg)",
+                        color: "var(--blue)",
+                      }}
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              ) : null}
+
+              <div
+                style={{
+                  color: "var(--ink)",
+                  fontSize: 13,
+                  lineHeight: 1.7,
+                  whiteSpace: "pre-wrap",
+                  background: "var(--card-bg)",
+                  padding: 16,
+                  borderRadius: 10,
+                  border: "1px solid var(--border)",
+                }}
+              >
+                {selectedAnnouncement.summary}
+              </div>
+            </div>
+
+            <footer>
+              <button
+                type="button"
+                onClick={() => setSelectedAnnouncement(null)}
+                style={{
+                  background: "var(--blue)",
+                  color: "#fff",
+                  border: 0,
+                  fontWeight: 700,
+                }}
+              >
+                Close
+              </button>
+            </footer>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
+
