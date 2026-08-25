@@ -1,0 +1,9 @@
+-- AlterEnum
+ALTER TYPE "Role" ADD VALUE 'COORDINATOR';
+ALTER TYPE "Role" ADD VALUE 'OFFICER';
+ALTER TYPE "Role" ADD VALUE 'SUPER_ADMIN';
+
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN     "customPermissions" TEXT[] DEFAULT ARRAY[]::TEXT[],
+ADD COLUMN     "isActive" BOOLEAN NOT NULL DEFAULT true,
+ADD COLUMN     "title" TEXT;

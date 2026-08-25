@@ -14,6 +14,7 @@ import {
   LogOut,
   Menu,
   Settings,
+  ShieldCheck,
   Users,
   X,
 } from "lucide-react";
@@ -29,6 +30,7 @@ const nav = [
   ["Job profiles", "/admin/job-profiles", BriefcaseBusiness],
   ["Applications", "/admin/applications", ClipboardCheck],
   ["Students", "/admin/students", GraduationCap],
+  ["Users & RBAC", "/admin/users", ShieldCheck],
   ["Feedbacks", "/admin/feedbacks", FileQuestion],
   ["NOC requests", "/admin/noc-requests", FileText],
   ["Team", "/admin/team", Users],
@@ -40,7 +42,7 @@ export function AdminShell({
   admin,
 }: {
   children: React.ReactNode;
-  admin: { name: string; initials: string };
+  admin: { name: string; initials: string; role?: string; title?: string | null };
 }) {
   const path = usePathname();
   const [open, setOpen] = useState(false);
@@ -116,7 +118,7 @@ export function AdminShell({
                 <span>{admin.initials}</span>
                 <div>
                   <strong>{admin.name}</strong>
-                  <small>Administrator</small>
+                  <small>{admin.title || (admin.role ? admin.role.replace("_", " ") : "Administrator")}</small>
                 </div>
               </button>
               {profileOpen && (
