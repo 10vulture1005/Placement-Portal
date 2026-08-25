@@ -13,8 +13,11 @@ export const requireAdmin = cache(async () => {
 
   const email = session.user.email;
   const isBootstrapAdmin = isAdminEmail(email);
+  const hasCustomPerms =
+    (session.user.customPermissions?.length ?? 0) > 0 ||
+    (session.user.effectivePermissions?.length ?? 0) > 0;
 
-  if (!isBootstrapAdmin && !isElevatedRole(session.user.role)) {
+  if (!isBootstrapAdmin && !isElevatedRole(session.user.role) && !hasCustomPerms) {
     redirect("/dashboard");
   }
 
