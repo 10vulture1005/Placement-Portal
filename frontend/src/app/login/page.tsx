@@ -3,6 +3,7 @@ import Image from "next/image";
 import { redirect } from "next/navigation";
 import { auth, signIn } from "@/lib/auth";
 import { studentEmailDomain } from "@/lib/auth-access";
+import { isElevatedRole } from "@/lib/permissions";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 
 function describeError(code: string | undefined, domain: string) {
@@ -37,7 +38,7 @@ export default async function LoginPage({
   searchParams: Promise<{ error?: string }>;
 }) {
   const session = await auth();
-  if (session) redirect(session.user.role === "ADMIN" ? "/admin/dashboard" : "/dashboard");
+  if (session) redirect(isElevatedRole(session.user.role) ? "/admin/dashboard" : "/dashboard");
 
   const domain = studentEmailDomain();
   const problem = describeError((await searchParams).error, domain);

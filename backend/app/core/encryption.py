@@ -62,9 +62,39 @@ def decrypt_value(payload: str) -> str:
     return aesgcm.decrypt(iv, ciphertext + tag, None).decode("utf-8")
 
 
+def encrypt_bytes(data: bytes, custom_key: bytes | None = None) -> bytes:
+    """
+    Encrypt arbitrary binary data (e.g. PDF documents) with AES-256-GCM.
+    Returns: [12 bytes IV][16 bytes Tag][Ciphertext]
+    """
+    key = custom_key or _get_key()
+    iv = secrets.token_bytes(12)
+    aesgcm = AESGCM(key)
+    # PyCA appends tag to ciphertext
+    combined = aesgcm.encrypt(iv, data, None)
+    ciphertext = combined[:-_GCM_TAG_LENGTH]
+    tag = combined[-_GCM_TAG_LENGTH:]
+    return iv + tag + ciphertext
+
+
+def decrypt_bytes(payload: bytes, custom_key: bytes | None = None) -> bytes:
+    """
+    Decrypt binary AES-256-GCM data formatted as [12 bytes IV][16 bytes Tag][Ciphertext].
+    """
+    if len(payload) < 28:
+        raise ValueError("Invalid encrypted binary payload — minimum length is 28 bytes")
+    key = custom_key or _get_key()
+    iv = payload[:12]
+    tag = payload[12:28]
+    ciphertext = payload[28:]
+    aesgcm = AESGCM(key)
+    return aesgcm.decrypt(iv, ciphertext + tag, None)
+
+
 def is_encrypted(value: str | None) -> bool:
     """Returns True if the value looks like an encrypted payload."""
     if not value:
         return False
     parts = value.split(":")
     return len(parts) == 3 and all(len(p) > 0 for p in parts)
+

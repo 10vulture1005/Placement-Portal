@@ -12,7 +12,7 @@ export const requireStudent = cache(async () => {
   if (session.user.role !== "STUDENT") redirect("/admin/dashboard");
 
   const user = await db.user.findUnique({ where: { id: session.user.id } });
-  if (!user) redirect("/login");
+  if (!user || !user.isActive) redirect("/login");
 
   return { session, user };
 });

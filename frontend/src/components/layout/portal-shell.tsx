@@ -116,7 +116,8 @@ export function PortalShell({
             <div className="relative">
               <button
                 onClick={() => setProfileOpen(!profileOpen)}
-                className="student bg-transparent border-none p-0 text-left cursor-pointer"
+                className="student cursor-pointer"
+                aria-label="User account menu"
               >
                 <div className="avatar">{student.initials}</div>
                 <div>
@@ -130,13 +131,17 @@ export function PortalShell({
                     className="fixed inset-0 z-40"
                     onClick={() => setProfileOpen(false)}
                   />
-                  <div className="absolute right-0 mt-3 w-48 bg-[var(--card-bg)] border border-[var(--border)] rounded-xl shadow-xl z-50 overflow-hidden animate-[fadeSlideUp_0.15s_ease]">
+                  <div className="absolute right-0 mt-3 w-52 bg-[var(--card-bg)] border border-[var(--border)] rounded-2xl shadow-2xl z-50 overflow-hidden animate-[fadeSlideUp_0.15s_ease] p-1.5">
+                    <div className="px-3 py-2 border-b border-[var(--border)] mb-1">
+                      <strong className="block text-xs font-bold text-[var(--ink)] truncate">{student.name}</strong>
+                      <span className="block text-[10px] text-[var(--muted)] truncate">{student.subtitle}</span>
+                    </div>
                     <form action={handleSignOut}>
                       <button
                         type="submit"
-                        className="w-full flex items-center gap-2 px-4 py-3 text-sm text-red-500 hover:bg-[var(--badge-red-bg)] font-semibold bg-transparent border-none cursor-pointer text-left transition-colors"
+                        className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-red-500 hover:bg-[var(--badge-red-bg)] font-semibold rounded-xl bg-transparent border-none cursor-pointer text-left transition-colors"
                       >
-                        <LogOut size={16} />
+                        <LogOut size={15} />
                         Sign out
                       </button>
                     </form>

@@ -20,9 +20,13 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
   });
   if (!job) notFound();
 
-  const [resumeCount, existingApplication] = student.user
+  const [resumes, existingApplication] = student.user
     ? await Promise.all([
-        db.resume.count({ where: { userId: student.user.id } }),
+        db.resume.findMany({
+          where: { userId: student.user.id },
+          select: { id: true, label: true, fileName: true },
+          orderBy: { uploadedAt: "desc" },
+        }),
         db.application.findUnique({
           where: {
             userId_jobProfileId: {
@@ -32,7 +36,8 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
           },
         }),
       ])
-    : [0, null];
+    : [[], null];
+  const resumeCount = resumes.length;
   const profile = student.user ? toEligibilityProfile(student.user, resumeCount) : null;
   const checks = profile
     ? evaluateEligibility(profile, {
@@ -58,5 +63,5 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
     ? "Not specified"
     : new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(job.ctcStipend));
 
-  return <AuthenticatedPortalShell><div className="job-detail"><Link className="back-link" href="/company-events"><ArrowLeft/>Back to opportunities</Link><div className="job-detail-grid"><article className="job-main"><div className="job-hero"><div className="detail-logo" style={{ background: companyColor(job.company.name) }}>{companyInitials(job.company.name)}</div><div><span>{job.company.name}</span><h1>{job.title}</h1><b>{jobTypeLabel(job.type)}</b></div></div><div className="job-facts"><div><MapPin/><span>Location<strong>{job.locations.join(" / ") || "Not specified"}</strong></span></div><div><IndianRupee/><span>Compensation<strong>{compensation}</strong></span></div><div><CalendarDays/><span>Deadline<strong>{formatPortalDate(job.registrationDeadline, true)}</strong></span></div><div><BriefcaseBusiness/><span>Batch<strong>{job.batch}</strong></span></div></div><section><h2>Opening overview</h2><p>{job.openingOverview ?? job.description ?? "No additional description has been published."}</p></section><section><h2>Eligibility criteria</h2><dl><div><dt>Minimum CGPA</dt><dd>{job.minCGPA}</dd></div><div><dt>Maximum backlogs</dt><dd>{job.maxBacklogs}</dd></div><div><dt>Allowed branches</dt><dd>{job.allowedBranches.join(", ") || "All branches"}</dd></div></dl></section></article><aside className="eligibility-card"><span className="eyebrow">Automatic evaluation</span><h2>{profile ? (eligible ? "You are eligible" : "Not currently eligible") : "Complete your profile"}</h2><p>{profile ? "Calculated from your saved student profile." : "Add academic details to calculate eligibility for this role."}</p>{checks.length ? <div>{checks.map(check => <span className={check.pass ? "pass" : "fail"} key={check.key}>{check.pass ? <CheckCircle2/> : <XCircle/>}{check.label}</span>)}</div> : null}<ApplyButton jobId={job.id} disabledReason={disabledReason} alreadyApplied={Boolean(existingApplication)}/><small>Applications are saved to your account and are visible only to you and authorized placement administrators.</small></aside></div></div></AuthenticatedPortalShell>;
+  return <AuthenticatedPortalShell><div className="job-detail"><Link className="back-link" href="/company-events"><ArrowLeft/>Back to opportunities</Link><div className="job-detail-grid"><article className="job-main"><div className="job-hero"><div className="detail-logo" style={{ background: companyColor(job.company.name) }}>{companyInitials(job.company.name)}</div><div><span>{job.company.name}</span><h1>{job.title}</h1><b>{jobTypeLabel(job.type)}</b></div></div><div className="job-facts"><div><MapPin/><span>Location<strong>{job.locations.join(" / ") || "Not specified"}</strong></span></div><div><IndianRupee/><span>Compensation<strong>{compensation}</strong></span></div><div><CalendarDays/><span>Deadline<strong>{formatPortalDate(job.registrationDeadline, true)}</strong></span></div><div><BriefcaseBusiness/><span>Batch<strong>{job.batch}</strong></span></div></div><section><h2>Opening overview</h2><p>{job.openingOverview ?? job.description ?? "No additional description has been published."}</p></section><section><h2>Eligibility criteria</h2><dl><div><dt>Minimum CGPA</dt><dd>{job.minCGPA}</dd></div><div><dt>Maximum backlogs</dt><dd>{job.maxBacklogs}</dd></div><div><dt>Allowed branches</dt><dd>{job.allowedBranches.join(", ") || "All branches"}</dd></div></dl></section></article><aside className="eligibility-card"><span className="eyebrow">Automatic evaluation</span><h2>{profile ? (eligible ? "You are eligible" : "Not currently eligible") : "Complete your profile"}</h2><p>{profile ? "Calculated from your saved student profile." : "Add academic details to calculate eligibility for this role."}</p>{checks.length ? <div>{checks.map(check => <span className={check.pass ? "pass" : "fail"} key={check.key}>{check.pass ? <CheckCircle2/> : <XCircle/>}{check.label}</span>)}</div> : null}<ApplyButton jobId={job.id} disabledReason={disabledReason} alreadyApplied={Boolean(existingApplication)} resumes={resumes}/><small>Applications are saved to your account and are visible only to you and authorized placement administrators.</small></aside></div></div></AuthenticatedPortalShell>;
 }

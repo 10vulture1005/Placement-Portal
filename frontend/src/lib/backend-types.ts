@@ -24,8 +24,16 @@ export type BackendProfile = {
   class12Percent: number | null;
   cgpa: number | null;
   backlogs: number | null;
-  aadhaarEncrypted: string | null;
-  panCardEncrypted: string | null;
+  aadhaarEncrypted?: string | null;
+  aadhaarProvided?: boolean;
+  aadhaarMasked?: string | null;
+  aadhaarDocProvided?: boolean;
+  aadhaarDocFileName?: string | null;
+  panCardEncrypted?: string | null;
+  panProvided?: boolean;
+  panMasked?: string | null;
+  panDocProvided?: boolean;
+  panDocFileName?: string | null;
 };
 
 export type BackendResume = {
