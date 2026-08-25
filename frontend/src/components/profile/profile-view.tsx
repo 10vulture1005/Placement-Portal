@@ -103,8 +103,16 @@ const contactFields: Array<[keyof ProfileValues, string, string]> = [
   ["currentAddress", "Current address", "text"],
 ];
 
+const DATE_FMT = new Intl.DateTimeFormat("en-IN", {
+  day: "2-digit",
+  month: "short",
+  year: "numeric",
+});
+
 export function ProfileView({ profile }: { profile: StudentProfileViewData }) {
   const router = useRouter();
+
+  // ── Profile edit state ──────────────────────────────────────────────────
   const [editing, setEditing] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);

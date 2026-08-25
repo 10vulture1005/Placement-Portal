@@ -1,3 +1,15 @@
+"""
+Resume upload endpoints.
+
+POST /uploads/resume  — student uploads their own PDF resume
+POST /uploads/admin/noc-document — admin uploads a NOC PDF
+"""
+from __future__ import annotations
+
+import re
+import uuid
+
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from typing import Optional
 import uuid
 from fastapi import APIRouter, Depends, Form, HTTPException, UploadFile, File
@@ -6,6 +18,8 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
+from app.core.storage import StorageError, validate_pdf, upload_pdf, delete_file
+from app.dependencies import get_db, require_admin, require_student
 from app.core.security import (
     PERM_APPLICATIONS_READ,
     PERM_STUDENTS_READ,
@@ -38,7 +52,18 @@ async def upload_resume(
             detail=f"Maximum resumes limit reached ({settings.max_resumes_per_student}).",
         )
 
+    # Read the entire body — size validation happens inside validate_pdf
     content = await file.read()
+    if len(content) == 0:
+        raise HTTPException(status_code=400, detail="The uploaded file is empty.")
+    if len(content) > MAX_RESUME_BYTES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"File exceeds the {settings.allowed_pdf_size_mb} MB limit. "
+                   f"Received {len(content) / (1024 * 1024):.1f} MB.",
+        )
+
+    # PDF magic-byte validation (not trusting extension or content-type)
     try:
         validate_pdf(content)
     except Exception as e:
@@ -72,6 +97,9 @@ async def upload_noc_document(
     admin_payload: dict = Depends(require_admin),
 ):
     content = await file.read()
+    if len(content) == 0:
+        raise HTTPException(status_code=400, detail="The uploaded file is empty.")
+
     try:
         validate_pdf(content)
     except Exception as e:
