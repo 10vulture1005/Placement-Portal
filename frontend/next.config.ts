@@ -11,10 +11,18 @@ try {
   // No root .env: expected in containers and CI, where values are injected.
 }
 
+/** @type {import('next').NextConfig} */
+ 
+
 const nextConfig: NextConfig = {
   output: "standalone",
   poweredByHeader: false,
   typedRoutes: false,
+    experimental: {
+    serverActions: {
+      bodySizeLimit: "5mb",
+    },
+  },
   async headers() {
     return [{
       source: "/(.*)",
